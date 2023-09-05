@@ -3,4 +3,17 @@
   <groupId>ds.assignment</groupId>
   <artifactId>javaClient</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+  
+  
+  <dependencies>
+	  
+        <!-- https://mvnrepository.com/artifact/org.zeromq/jeromq -->
+        <dependency>
+            <groupId>org.zeromq</groupId>
+            <artifactId>jeromq</artifactId>
+            <version>0.5.3</version>
+        </dependency>
+    
+  </dependencies>
+  
 </project>
