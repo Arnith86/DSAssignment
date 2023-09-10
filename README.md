@@ -4,7 +4,7 @@ Adam Noble: c21adano
 
 Language used: Java 
 Package Manager: Maven
-Java Version: 1.7
+Java Version: 17
 
 Dependancyes:  
 ```
