@@ -26,14 +26,15 @@ public class JavaClientGui {
 	
 	
 	private JPanel queuePanel; 
-	
+	private JPanel newQueueEntry; 
 	
 	
 	public JavaClientGui () {
 		
 		applicationFrame = new JFrame("Queue");
 		
-		// Top panel which will contain, instructions and name input	
+		// TOP PANEL  
+		// contains, instructions and name input	
 		inputPanel = new JPanel(); 
 		inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.Y_AXIS));
 		
@@ -51,16 +52,26 @@ public class JavaClientGui {
 		inputPanel.add(instructionText);
 		inputPanel.add(textInputPanel);
 		
+		// BOTTOM PANEL 
+		// Contains the current queue
 		
+		queuePanel = new JPanel();
+		queuePanel.setLayout(new BoxLayout(queuePanel, BoxLayout.Y_AXIS));
 		
+		// Used for testing, will most likely not remain here. 
+		for (String string : testArray) {
+			newQueueEntry = new JPanel(); 
+			newQueueEntry.add(new JLabel(string));
+			queuePanel.add(newQueueEntry);
+			// queuePanel.add(new JLabel(string));
+		}
 		
-		// not used yet
-		// 	panel.setLayout(new BorderLayout(, BoxLayout.Y_AXIS));
 		
 		// Frame setup
-		applicationFrame.add(inputPanel);
+		applicationFrame.add(inputPanel, BorderLayout.NORTH);
+		applicationFrame.add(queuePanel, BorderLayout.CENTER);
 		// Some more configuration might be needed 
-		applicationFrame.setSize(800, 800);
+		applicationFrame.setSize(400, 800);
 		applicationFrame.setVisible(true);
 		applicationFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
