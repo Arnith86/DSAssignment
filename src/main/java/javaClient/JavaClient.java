@@ -68,8 +68,9 @@ public class JavaClient implements Runnable {
 		
 	}
 	
+	// places supplied user in the TinyQueue 
 	private void enterQueue() {
-		// NOT WORKING CORRECTLY 
+		
 		try(ZContext context = new ZContext()){
 			
 			ZMQ.Socket socket = context.createSocket(SocketType.REQ); 
@@ -95,10 +96,9 @@ public class JavaClient implements Runnable {
 		
 	}
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		
+		JavaClientGui gui = new JavaClientGui(); 
 		
-		System.out.println("hello world");
 		JavaClient javaClient = new JavaClient();
 		
 		javaClient.enterQueue();

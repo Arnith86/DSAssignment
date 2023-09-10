@@ -42,7 +42,7 @@ public class JavaClientHeartbeatTread implements Runnable {
 			ZMQ.Socket error = context.createSocket(SocketType.SUB);
 			error.connect("tcp://ds.iit.his.se:5555");
 			
-			error.subscribe("queue");
+			error.subscribe("error");
 			
 			String errorMessage =  new String(error.recv(), ZMQ.CHARSET);
 			String msg =  new String(error.recv(), ZMQ.CHARSET);
