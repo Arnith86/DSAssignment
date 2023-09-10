@@ -33,15 +33,21 @@ public class JavaClientGui {
 		
 		applicationFrame = new JFrame("Queue");
 		
-			
+		// Top panel which will contain, instructions and name input	
 		inputPanel = new JPanel(); 
 		inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.Y_AXIS));
+		
 		instructionText = new JLabel("Supply your name and press the send button!");
+		
+		// Panel containing Name input field and send button 
+		// will be placed under the instruction panel
 		textInputPanel = new JPanel();
 		nameInput = new JTextField("Name");
 		sendButton = new JButton("Send");
+		
 		textInputPanel.add(nameInput);
 		textInputPanel.add(sendButton);
+		
 		inputPanel.add(instructionText);
 		inputPanel.add(textInputPanel);
 		
