@@ -13,6 +13,8 @@ import javax.swing.JTextField;
 public class JavaClientGui {
 	// used for test on  the GUI, should be removed when the implementation is finished
 	
+	private String user; 
+	
 	private JLabel instructionText; 
 	
 	
@@ -58,14 +60,6 @@ public class JavaClientGui {
 		queuePanel = new JPanel();
 		queuePanel.setLayout(new BoxLayout(queuePanel, BoxLayout.Y_AXIS));
 		
-//		// Used for testing, will most likely not remain here. 
-//		for (String string : testArray) {
-//			newQueueEntry = new JPanel(); 
-//			newQueueEntry.add(new JLabel(string));
-//			queuePanel.add(newQueueEntry);
-//			// queuePanel.add(new JLabel(string));
-//		}
-		
 		
 		// Frame setup
 		applicationFrame.add(inputPanel, BorderLayout.NORTH);
@@ -79,12 +73,12 @@ public class JavaClientGui {
 	
 	public void setStudentQueue(LinkedList<Students> studentList){
 		studentList.forEach(students -> {
-			System.out.println(students.getName());
-		
+		//	System.out.println(students.getName());   // HERE FOR TESTING REASONS to be removed before finish
 		
 			newQueueEntry = new JPanel(); 
 			newQueueEntry.add(new JLabel(students.getName()));
 			queuePanel.add(newQueueEntry);
+			
 			applicationFrame.revalidate(); 
 			applicationFrame.repaint(); 
 		
