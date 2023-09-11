@@ -135,7 +135,7 @@ public class JavaClient implements Runnable {
 		javaClient.enterQueue();
 		javaClient.getCurrentQueue();
 		
-		while(true) {}
+		
 		
 	}
 }

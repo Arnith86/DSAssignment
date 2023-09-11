@@ -39,15 +39,16 @@ public class JavaClientHeartbeatTread implements Runnable {
 			socket.send(heartBeat.getBytes(ZMQ.CHARSET),0);
 			byte[] reply = socket.recv(0); 
 			
-			ZMQ.Socket error = context.createSocket(SocketType.SUB);
-			error.connect("tcp://ds.iit.his.se:5555");
 			
-			error.subscribe("error");
+			//cant receive error message 
+			//ZMQ.Socket error = context.createSocket(SocketType.SUB);
+			//error.connect("tcp://ds.iit.his.se:5555");
+			//error.subscribe("error");
 			
-			String errorMessage =  new String(error.recv(), ZMQ.CHARSET);
-			String msg =  new String(error.recv(), ZMQ.CHARSET);
+			//String errorMessage =  new String(error.recv(), ZMQ.CHARSET);
+			//String msg =  new String(error.recv(), ZMQ.CHARSET);
 			
-			System.out.println(errorMessage);
+			//System.out.println(errorMessage);
 			//System.out.println(msg);
 		
 		}
