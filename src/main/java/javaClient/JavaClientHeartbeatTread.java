@@ -48,7 +48,7 @@ public class JavaClientHeartbeatTread implements Runnable {
 			String msg =  new String(error.recv(), ZMQ.CHARSET);
 			
 			System.out.println(errorMessage);
-			System.out.println(msg);
+			//System.out.println(msg);
 		
 		}
 		

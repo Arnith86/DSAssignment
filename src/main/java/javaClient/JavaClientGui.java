@@ -1,6 +1,7 @@
 package javaClient;
 
 import java.awt.BorderLayout;
+import java.util.LinkedList;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -11,8 +12,6 @@ import javax.swing.JTextField;
 
 public class JavaClientGui {
 	// used for test on  the GUI, should be removed when the implementation is finished
-	private String[] testArray = {"JP", "ADAM", "MARK", "SVEN", "MIST"};  
-	
 	
 	private JLabel instructionText; 
 	
@@ -55,16 +54,17 @@ public class JavaClientGui {
 		// BOTTOM PANEL 
 		// Contains the current queue
 		
+		
 		queuePanel = new JPanel();
 		queuePanel.setLayout(new BoxLayout(queuePanel, BoxLayout.Y_AXIS));
 		
-		// Used for testing, will most likely not remain here. 
-		for (String string : testArray) {
-			newQueueEntry = new JPanel(); 
-			newQueueEntry.add(new JLabel(string));
-			queuePanel.add(newQueueEntry);
-			// queuePanel.add(new JLabel(string));
-		}
+//		// Used for testing, will most likely not remain here. 
+//		for (String string : testArray) {
+//			newQueueEntry = new JPanel(); 
+//			newQueueEntry.add(new JLabel(string));
+//			queuePanel.add(newQueueEntry);
+//			// queuePanel.add(new JLabel(string));
+//		}
 		
 		
 		// Frame setup
@@ -75,6 +75,29 @@ public class JavaClientGui {
 		applicationFrame.setVisible(true);
 		applicationFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
+	}
+	
+	public void setStudentQueue(LinkedList<Students> studentList){
+		studentList.forEach(students -> {
+			System.out.println(students.getName());
+		
+		
+			newQueueEntry = new JPanel(); 
+			newQueueEntry.add(new JLabel(students.getName()));
+			queuePanel.add(newQueueEntry);
+			applicationFrame.revalidate(); 
+			applicationFrame.repaint(); 
+		
+		});
+		
+		
+		
+		
+		
+		
+		//		for (Students students : studentList) {
+//			System.out.println();
+//		}
 	}
 	
 }
