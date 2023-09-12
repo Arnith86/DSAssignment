@@ -18,9 +18,9 @@ import org.zeromq.ZMQ;
 // import org.zeromq.ZMQ.Socket;
 
 public class JavaClient implements Runnable {
-	
-	JavaClientGui gui; 
-	ScheduledExecutorService heartbeatTimer;
+	private String user; 
+	private JavaClientGui gui; 
+	private ScheduledExecutorService heartbeatTimer;
 	private LinkedList<Students> studentList; 
 	
 	public JavaClient (JavaClientGui gui){
@@ -60,6 +60,10 @@ public class JavaClient implements Runnable {
 //		}
 //		return null; 
 //	}
+	public void setUser(String user) {
+		this.user=user; 
+		enterQueue(user);
+	}
 	
 	private void getCurrentQueue() {
 		// SEEMS TO WORK FINE 
@@ -99,27 +103,28 @@ public class JavaClient implements Runnable {
 	}
 	
 	// places supplied user in the TinyQueue 
-	private void enterQueue() {
+	// TODO!!!!!   WE NEED TO CREATE A USER ID SOMEHOW!!!!!!!!!!!!!!!!!!!!!!
+	private void enterQueue(String user) {
 		
 		try(ZContext context = new ZContext()){
 			
 			ZMQ.Socket socket = context.createSocket(SocketType.REQ); 
 			socket.connect("tcp://ds.iit.his.se:5556");
 			
-			System.out.println("Placing in Queue");
+			System.out.println("Placing in Queue"); // remove this when application is finished 
 			
-			String enterQueue = "{\"enterQueue\": true, \"name\": \"JP\", \"clientId\": \"JP\"}";
+			String enterQueue = "{\"enterQueue\": true, \"name\": \""+user+"\", \"clientId\": \"JP\"}";
 			
 			socket.send(enterQueue.getBytes(ZMQ.CHARSET),0);
 			
-			System.out.println("Placed in queue");
+			System.out.println("Placed in queue");   // remove this when application is finished 
 			
 			byte[] reply = socket.recv(0); 
 			
-			System.out.println("this was recived: " + new String(reply, ZMQ.CHARSET));
+			System.out.println("this was recived: " + new String(reply, ZMQ.CHARSET));  // this should not be written out when application is finished only receive the reply 
 			
 			// IN TESTING 
-			JavaClientHeartbeatTread heartbeat = new JavaClientHeartbeatTread();
+			JavaClientHeartbeatTread heartbeat = new JavaClientHeartbeatTread(user);
 			Thread heartbeatThread = new Thread(heartbeat);
 			heartbeatThread.start(); 
 			// IN TESTING 
@@ -132,7 +137,7 @@ public class JavaClient implements Runnable {
 		
 		JavaClient javaClient = new JavaClient(gui);
 		
-		javaClient.enterQueue();
+		//javaClient.enterQueue();
 		javaClient.getCurrentQueue();
 		
 		

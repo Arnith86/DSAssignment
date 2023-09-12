@@ -10,8 +10,10 @@ import org.zeromq.ZMQ;
 
 public class JavaClientHeartbeatTread implements Runnable {
 	
-	public JavaClientHeartbeatTread (){
-		
+	private String user;
+	
+	public JavaClientHeartbeatTread (String user){
+		this.user = user; 
 	}
 	
 	
@@ -21,14 +23,14 @@ public class JavaClientHeartbeatTread implements Runnable {
 //        makingACoffee = Executors.newScheduledThreadPool(1);
 //        makingACoffee.scheduleWithFixedDelay(heartbeat(), 2000, 2000, TimeUnit.MILLISECONDS);//make coffee every 2 seconds
 		while(true) {
-			heartbeat();
+			heartbeat(user);
 		}
 	}
 	
-	private void heartbeat() {
+	private void heartbeat(String user) {
 		
 		String heartBeat = "{\r\n"
-				+ "    \"name\": \"JP\",\r\n"
+				+ "    \"name\": \""+user+"\",\r\n"
 				+ "    \"clientId\": \"10\"\r\n"
 				+ "}"; 
 		
@@ -54,7 +56,7 @@ public class JavaClientHeartbeatTread implements Runnable {
 		}
 		
 		
-		System.out.println("Hello FROM heartbeat!");
+		// System.out.println("Hello FROM heartbeat!");
 		// return null; 
 	}
 

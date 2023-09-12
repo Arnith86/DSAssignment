@@ -92,10 +92,11 @@ public class JavaClientGui implements ActionListener{
 	// 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		
+		// registers supplied name, and initiates placement in queue
 		if (e.getSource().equals(sendButton)) {
 			String textNameInput = nameInput.getText();
 			this.user = textNameInput;
+			javaClient.setUser(user);
 		}
 		
 	}
