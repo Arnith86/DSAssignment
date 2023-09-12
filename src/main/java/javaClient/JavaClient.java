@@ -17,7 +17,7 @@ import org.zeromq.ZMQ;
 
 // import org.zeromq.ZMQ.Socket;
 
-public class JavaClient implements Runnable {
+public class JavaClient {
 	private String user; 
 	private JavaClientGui gui; 
 	private ScheduledExecutorService heartbeatTimer;
@@ -26,23 +26,15 @@ public class JavaClient implements Runnable {
 	public JavaClient (JavaClientGui gui){
 		// IN TESTING 
 		this.gui = gui; 
-		heartbeatTimer = Executors.newScheduledThreadPool(1);
-		//heartbeatTimer.execute(null);
 		
+		// this timer gets an updated queue every 0.5 sec
+		// THOUGH AT THE TIME THERE IS NOTHING THAT REMOVES THE OLD QUEUE!! so it gets addad to the old!
+		ScheduledExecutorService queueUpdater;
+		queueUpdater = Executors.newScheduledThreadPool(1);
+		queueUpdater.scheduleWithFixedDelay(() -> getCurrentQueue(), 500 , 500 , TimeUnit.MILLISECONDS);
 		
 	}
 	
-
-	
-
-	@Override
-	public void run() {
-//		enterQueue();
-//		getCurrentQueue();
-		//heartbeatTimer.scheduleWithFixedDelay(heartbeat(), 500, 500, TimeUnit.MILLISECONDS);
-		
-		
-	}
 	
 //	private Runnable heartbeat() {
 //		
@@ -60,6 +52,7 @@ public class JavaClient implements Runnable {
 //		}
 //		return null; 
 //	}
+	
 	public void setUser(String user) {
 		this.user=user; 
 		enterQueue(user);
@@ -138,7 +131,7 @@ public class JavaClient implements Runnable {
 		JavaClient javaClient = new JavaClient(gui);
 		
 		//javaClient.enterQueue();
-		javaClient.getCurrentQueue();
+		//javaClient.getCurrentQueue();
 		
 		
 		
