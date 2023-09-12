@@ -1,6 +1,8 @@
 package javaClient;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.LinkedList;
 
 import javax.swing.BoxLayout;
@@ -10,13 +12,14 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-public class JavaClientGui {
+public class JavaClientGui implements ActionListener{
 	// used for test on  the GUI, should be removed when the implementation is finished
 	
 	private String user; 
 	
-	private JLabel instructionText; 
+	private JavaClient javaClient = new JavaClient(this);
 	
+	private JLabel instructionText; 
 	
 	private JFrame applicationFrame;
 	
@@ -69,6 +72,7 @@ public class JavaClientGui {
 		applicationFrame.setVisible(true);
 		applicationFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
+		sendButton.addActionListener(this);
 	}
 	
 	public void setStudentQueue(LinkedList<Students> studentList){
@@ -83,15 +87,17 @@ public class JavaClientGui {
 			applicationFrame.repaint(); 
 		
 		});
+	}
+
+	// 
+	@Override
+	public void actionPerformed(ActionEvent e) {
 		
+		if (e.getSource().equals(sendButton)) {
+			String textNameInput = nameInput.getText();
+			this.user = textNameInput;
+		}
 		
-		
-		
-		
-		
-		//		for (Students students : studentList) {
-//			System.out.println();
-//		}
 	}
 	
 }
