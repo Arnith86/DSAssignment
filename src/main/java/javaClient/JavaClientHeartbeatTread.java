@@ -11,27 +11,25 @@ import org.zeromq.ZMQ;
 public class JavaClientHeartbeatTread implements Runnable {
 	
 	private String user;
+	private String UID; 
 	
-	public JavaClientHeartbeatTread (String user){
+	public JavaClientHeartbeatTread (String user){  // UID needs to be received when we figure out what it should be..
 		this.user = user; 
 	}
 	
 	
 	@Override
 	public void run() {
-//		  ScheduledExecutorService makingACoffee;
-//        makingACoffee = Executors.newScheduledThreadPool(1);
-//        makingACoffee.scheduleWithFixedDelay(heartbeat(), 2000, 2000, TimeUnit.MILLISECONDS);//make coffee every 2 seconds
-		while(true) {
-			heartbeat(user);
-		}
+		ScheduledExecutorService pulseHeartbeat;
+		pulseHeartbeat = Executors.newScheduledThreadPool(1);
+		pulseHeartbeat.scheduleWithFixedDelay(() -> heartbeat(user), 2000 , 2000 , TimeUnit.MILLISECONDS);
 	}
 	
-	private void heartbeat(String user) {
+	private Runnable heartbeat(String user) {
 		
 		String heartBeat = "{\r\n"
 				+ "    \"name\": \""+user+"\",\r\n"
-				+ "    \"clientId\": \"10\"\r\n"
+				+ "    \"clientId\": \"JP\"\r\n"
 				+ "}"; 
 		
 		try(ZContext context = new ZContext()){
@@ -57,7 +55,7 @@ public class JavaClientHeartbeatTread implements Runnable {
 		
 		
 		// System.out.println("Hello FROM heartbeat!");
-		// return null; 
+		 return null; 
 	}
 
 }

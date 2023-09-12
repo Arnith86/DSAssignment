@@ -103,7 +103,7 @@ public class JavaClient implements Runnable {
 	}
 	
 	// places supplied user in the TinyQueue 
-	// TODO!!!!!   WE NEED TO CREATE A USER ID SOMEHOW!!!!!!!!!!!!!!!!!!!!!!
+	// TODO!!!!!   WE NEED TO CREATE A UID SOMEHOW!!!!!!!!!!!!!!!!!!!!!!
 	private void enterQueue(String user) {
 		
 		try(ZContext context = new ZContext()){
