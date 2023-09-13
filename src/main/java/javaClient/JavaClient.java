@@ -16,7 +16,8 @@ import org.zeromq.ZMQ;
 public class JavaClient {
 	private String user; 
 	private JavaClientGui gui; 
-	private LinkedList<Students> studentList; 
+	private LinkedList<Students> studentList;
+	private LinkedList<Supervisors> supervisors; 
 	
 	public JavaClient (JavaClientGui gui){
 		// IN TESTING 
@@ -27,6 +28,59 @@ public class JavaClient {
 	public void setUser(String user) {
 		this.user=user; 
 		enterQueue(user);
+	}
+	
+	
+	private Runnable getCurrentSupervisors() {
+		
+		supervisors = new LinkedList<Supervisors>();
+		
+		try(ZContext context = new ZContext()){
+			ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
+			subscriber.connect("tcp://ds.iit.his.se:5555");
+			subscriber.subscribe("supervisors");
+			
+			String topic =  new String(subscriber.recv(), ZMQ.CHARSET);
+			//String msg =  new String(subscriber.recv(), ZMQ.CHARSET);
+			
+			
+			JSONArray jsonMsg = new JSONArray(new String(subscriber.recv(), ZMQ.CHARSET));
+			
+			
+//			[ 
+//			    {"name": <name>, "status": "pending"|"available"|"occupied", "client": undefined|{"ticket":<index>,"name":"<name>"}}, ... 
+//			]
+					
+					
+			// extracts the String value name from json objects housed in the jsonarray
+			for (int i = 0; i < jsonMsg.length(); i++) {
+				
+				// converts Json array elements into Json objects 
+				JSONObject supervisor = new JSONObject(jsonMsg.get(i).toString());
+				HashMap<String, Object> map = new HashMap<>();
+				Iterator<String> iter = supervisor.keys();
+				
+				// makes a hashmap out of the JSONobject 
+				while(iter.hasNext()) {
+					String key = iter.next();
+					map.put(key, supervisor.get(key));
+				}
+				String name = (String) map.get("name");
+				System.out.println("here");
+				System.out.println(name);
+				// extract the value "name" and "ticket" from object and create a new object using that value
+				// these are placed in a linked list.
+//				String name = (String) map.get("name");
+//				int ticket = (int) map.get("ticket");
+//				Students studentObject = new Students(name, ticket);
+//				studentList.add(studentObject);
+			}
+			
+			gui.setStudentQueue(studentList);
+			context.close();
+		}
+		
+		return null; 
 	}
 	
 	private Runnable getCurrentQueue() {
@@ -102,6 +156,7 @@ public class JavaClient {
 		ScheduledExecutorService queueUpdater;
 		queueUpdater = Executors.newScheduledThreadPool(1);
 		queueUpdater.scheduleWithFixedDelay(() -> javaClient.getCurrentQueue(), 0 , 500 , TimeUnit.MILLISECONDS);
+		javaClient.getCurrentSupervisors();
 		
 		//javaClient.enterQueue();
 	

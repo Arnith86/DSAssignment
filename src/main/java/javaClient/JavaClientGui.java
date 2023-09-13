@@ -23,13 +23,16 @@ public class JavaClientGui implements ActionListener{
 	private JavaClient javaClient = new JavaClient(this);
 	
 	private JLabel instructionText; 
+	private JLabel availableSupervisors;   // NOT USED YET 
 	
 	private JFrame applicationFrame;
 	
 	private JPanel inputPanel;
 	private JPanel textInputPanel; 
 	private JTextField nameInput; 
-	private JButton sendButton; 
+	private JButton sendButton;
+	
+	private JPanel supervisorsPanel;    // NOT USED YET 
 	
 	
 	private JPanel queuePanel; 
@@ -46,6 +49,7 @@ public class JavaClientGui implements ActionListener{
 		inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.Y_AXIS));
 		
 		instructionText = new JLabel("Supply your name and press the send button!");
+		availableSupervisors = new JLabel("supervisors");
 		
 		// Panel containing Name input field and send button 
 		// will be placed under the instruction panel
@@ -87,6 +91,7 @@ public class JavaClientGui implements ActionListener{
 			newQueueEntry = new JPanel(); 
 			JLabel tempLabel = new JLabel(students.getName());
 			
+			// is the supplied username is in the queue it will be underlined
 			if(students.getName().equals(user)) {
 				
 				// underlines the label 
