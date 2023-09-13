@@ -31,12 +31,15 @@ public class JavaClient {
 	}
 	
 	// Will display available supervisors 
+	// STILL IN EARLY TESTING !!!!!!!!!!!!!!!!
 	// Cannot test right now though... no supervisors present..
 	private Runnable getCurrentSupervisors() {
 		
 		supervisors = new LinkedList<Supervisors>();
 		
 		try(ZContext context = new ZContext()){
+			
+			// gets the list of Current Supervisors
 			ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
 			subscriber.connect("tcp://ds.iit.his.se:5555");
 			subscriber.subscribe("supervisors");
@@ -77,7 +80,24 @@ public class JavaClient {
 //				studentList.add(studentObject);
 			}
 			
-			gui.setStudentQueue(studentList);
+			//gui.setCurrentSupervisors(studentList); THIS METHOD DOES NOT EXIST YET 
+			
+			// checks if there is a message for the user 
+			// STILL IN EARLY TESTING !!!!!!!!!!!!!!!!
+			if(user != null) {
+				ZMQ.Socket supervisorMessage = context.createSocket(SocketType.SUB);
+				supervisorMessage.connect("tcp://ds.iit.his.se:5555");
+				supervisorMessage.subscribe(user);
+				
+//				{
+//				    "supervisor":"<name of supervisor>",
+//				    "message":"<message from supervisor>"
+//				}
+				
+				JSONObject supervisorMsgObject = new JSONObject(new String(supervisorMessage.recv(), ZMQ.CHARSET));
+				System.out.println(supervisorMsgObject);
+			}
+			
 			context.close();
 		}
 		
