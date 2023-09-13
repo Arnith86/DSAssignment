@@ -1,9 +1,12 @@
 package javaClient;
 
 import java.awt.BorderLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.font.TextAttribute;
 import java.util.LinkedList;
+import java.util.Map;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -82,7 +85,19 @@ public class JavaClientGui implements ActionListener{
 		studentList.forEach(students -> {
 			//System.out.println(students.getName()+" "+ students.getTicket());   // HERE FOR TESTING REASONS to be removed before finish
 			newQueueEntry = new JPanel(); 
-			newQueueEntry.add(new JLabel(students.getName()));
+			JLabel tempLabel = new JLabel(students.getName());
+			
+			if(students.getName().equals(user)) {
+				
+				// underlines the label 
+				Font font = tempLabel.getFont();
+				Map attributes = font.getAttributes();
+				attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+				tempLabel.setFont(font.deriveFont(attributes));
+				
+			}
+			
+			newQueueEntry.add(tempLabel);
 			queuePanel.add(newQueueEntry);
 		});
 		

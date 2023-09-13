@@ -64,7 +64,6 @@ public class JavaClient {
 			}
 			
 			gui.setStudentQueue(studentList);
-			studentList.clear();
 			context.close();
 		}
 		return null; 
