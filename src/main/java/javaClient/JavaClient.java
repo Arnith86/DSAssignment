@@ -3,19 +3,15 @@ package javaClient;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.JSONStringer;
 import org.zeromq.SocketType;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
-
-// import org.zeromq.ZMQ.Socket;
 
 public class JavaClient {
 	private String user; 
@@ -36,23 +32,6 @@ public class JavaClient {
 	}
 	
 	
-//	private Runnable heartbeat() {
-//		
-//		String heartBeat = "{\r\n"
-//				+ "    \"name\": \"JP\",\r\n"
-//				+ "    \"clientId\": \"JP\"\r\n"
-//				+ "}"; 
-//		
-//		try(ZContext context = new ZContext()){
-//			
-//			ZMQ.Socket socket = context.createSocket(SocketType.REQ); 
-//			socket.connect("tcp://ds.iit.his.se:5556");
-//			socket.send(heartBeat.getBytes(ZMQ.CHARSET),0);
-//			
-//		}
-//		return null; 
-//	}
-	
 	public void setUser(String user) {
 		this.user=user; 
 		enterQueue(user);
@@ -65,26 +44,27 @@ public class JavaClient {
 		try(ZContext context = new ZContext()){
 			ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
 			subscriber.connect("tcp://ds.iit.his.se:5555");
-			
 			subscriber.subscribe("queue");
 			
 			String topic =  new String(subscriber.recv(), ZMQ.CHARSET);
-			
-			
 			JSONArray jsonMsg = new JSONArray(new String(subscriber.recv(), ZMQ.CHARSET));
 		
-			
+			// extracts the String value name from json objects housed in the jsonarray
 			for (int i = 0; i < jsonMsg.length(); i++) {
-				 
+				
+				// converts Json array elements into Json objects 
 				JSONObject student = new JSONObject(jsonMsg.get(i).toString());
 				HashMap<String, Object> map = new HashMap<>();
 				Iterator<String> iter = student.keys();
 				
+				// makes a hashmap out of the JSONobject 
 				while(iter.hasNext()) {
 					String key = iter.next();
 					map.put(key, student.get(key));
 				}
 				
+				// extract the value "name" from object and create a new object using that value
+				// these are placed in a linked list.
 				String name = (String) map.get("name");
 				Students studentObject = new Students(name);
 				studentList.add(studentObject);
@@ -104,14 +84,10 @@ public class JavaClient {
 			ZMQ.Socket socket = context.createSocket(SocketType.REQ); 
 			socket.connect("tcp://ds.iit.his.se:5556");
 			
-			System.out.println("Placing in Queue"); // remove this when application is finished 
-			
 			String enterQueue = "{\"enterQueue\": true, \"name\": \""+user+"\", \"clientId\": \"JP\"}";
 			
 			socket.send(enterQueue.getBytes(ZMQ.CHARSET),0);
-			
-			System.out.println("Placed in queue");   // remove this when application is finished 
-			
+		
 			byte[] reply = socket.recv(0); 
 			
 			System.out.println("this was recived: " + new String(reply, ZMQ.CHARSET));  // this should not be written out when application is finished only receive the reply 

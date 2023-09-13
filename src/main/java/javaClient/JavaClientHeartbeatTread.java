@@ -57,5 +57,4 @@ public class JavaClientHeartbeatTread implements Runnable {
 		// System.out.println("Hello FROM heartbeat!");
 		 return null; 
 	}
-
 }
