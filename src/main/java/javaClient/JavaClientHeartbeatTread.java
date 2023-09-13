@@ -50,7 +50,7 @@ public class JavaClientHeartbeatTread implements Runnable {
 			
 			//System.out.println(errorMessage);
 			//System.out.println(msg);
-		
+			context.destroy();
 		}
 		
 		

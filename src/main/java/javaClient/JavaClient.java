@@ -16,19 +16,11 @@ import org.zeromq.ZMQ;
 public class JavaClient {
 	private String user; 
 	private JavaClientGui gui; 
-	private ScheduledExecutorService heartbeatTimer;
 	private LinkedList<Students> studentList; 
 	
 	public JavaClient (JavaClientGui gui){
 		// IN TESTING 
 		this.gui = gui; 
-		
-		// this timer gets an updated queue every 0.5 sec
-		// THOUGH AT THE TIME THERE IS NOTHING THAT REMOVES THE OLD QUEUE!! so it gets addad to the old!
-		ScheduledExecutorService queueUpdater;
-		queueUpdater = Executors.newScheduledThreadPool(1);
-		queueUpdater.scheduleWithFixedDelay(() -> getCurrentQueue(), 500 , 500 , TimeUnit.MILLISECONDS);
-		
 	}
 	
 	
@@ -37,8 +29,8 @@ public class JavaClient {
 		enterQueue(user);
 	}
 	
-	private void getCurrentQueue() {
-		// SEEMS TO WORK FINE 
+	private Runnable getCurrentQueue() {
+		
 		studentList = new LinkedList<Students>();
 		
 		try(ZContext context = new ZContext()){
@@ -63,16 +55,19 @@ public class JavaClient {
 					map.put(key, student.get(key));
 				}
 				
-				// extract the value "name" from object and create a new object using that value
+				// extract the value "name" and "ticket" from object and create a new object using that value
 				// these are placed in a linked list.
 				String name = (String) map.get("name");
-				Students studentObject = new Students(name);
+				int ticket = (int) map.get("ticket");
+				Students studentObject = new Students(name, ticket);
 				studentList.add(studentObject);
 			}
 			
 			gui.setStudentQueue(studentList);
+			studentList.clear();
+			context.close();
 		}
-		
+		return null; 
 	}
 	
 	// places supplied user in the TinyQueue 
@@ -105,11 +100,11 @@ public class JavaClient {
 		JavaClientGui gui = new JavaClientGui(); 
 		
 		JavaClient javaClient = new JavaClient(gui);
+		ScheduledExecutorService queueUpdater;
+		queueUpdater = Executors.newScheduledThreadPool(1);
+		queueUpdater.scheduleWithFixedDelay(() -> javaClient.getCurrentQueue(), 0 , 500 , TimeUnit.MILLISECONDS);
 		
 		//javaClient.enterQueue();
-		//javaClient.getCurrentQueue();
-		
-		
-		
+	
 	}
 }

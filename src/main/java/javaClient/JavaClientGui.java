@@ -76,17 +76,18 @@ public class JavaClientGui implements ActionListener{
 	}
 	
 	public void setStudentQueue(LinkedList<Students> studentList){
-		studentList.forEach(students -> {
-		//	System.out.println(students.getName());   // HERE FOR TESTING REASONS to be removed before finish
 		
+		queuePanel.removeAll();
+		
+		studentList.forEach(students -> {
+			//System.out.println(students.getName()+" "+ students.getTicket());   // HERE FOR TESTING REASONS to be removed before finish
 			newQueueEntry = new JPanel(); 
 			newQueueEntry.add(new JLabel(students.getName()));
 			queuePanel.add(newQueueEntry);
-			
-			applicationFrame.revalidate(); 
-			applicationFrame.repaint(); 
-		
 		});
+		
+		applicationFrame.revalidate(); 
+		applicationFrame.repaint();
 	}
 
 	// 
