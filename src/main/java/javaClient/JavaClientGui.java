@@ -82,7 +82,7 @@ public class JavaClientGui implements ActionListener{
 		queuePanel.setBorder(BorderFactory.createLineBorder(Color.black));
 		queuePanel.setLayout(new BoxLayout(queuePanel, BoxLayout.Y_AXIS));
 		
-		// CENTER PANEL - Settup
+		// CENTER PANEL - Setup
 		centerPanel = new JPanel();
 		centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 		centerPanel.add(availableSupervisors);

@@ -146,6 +146,7 @@ public class JavaClient {
 			Thread heartbeatThread = new Thread(heartbeat);
 			heartbeatThread.start(); 
 			// IN TESTING 
+			// THIS MUST BE TERMINATED WHEN supervisor removes student from list 
 		}
 		
 	}
