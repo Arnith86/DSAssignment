@@ -1,6 +1,7 @@
 package javaClient;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,6 +9,7 @@ import java.awt.font.TextAttribute;
 import java.util.LinkedList;
 import java.util.Map;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -34,6 +36,7 @@ public class JavaClientGui implements ActionListener{
 	
 	private JPanel supervisorsPanel;    // NOT USED YET 
 	
+	private JPanel centerPanel;
 	
 	private JPanel queuePanel; 
 	private JPanel newQueueEntry; 
@@ -43,13 +46,15 @@ public class JavaClientGui implements ActionListener{
 		
 		applicationFrame = new JFrame("Queue");
 		
+		
 		// TOP PANEL  
 		// contains, instructions and name input	
 		inputPanel = new JPanel(); 
 		inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.Y_AXIS));
+		inputPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 		
 		instructionText = new JLabel("Supply your name and press the send button!");
-		availableSupervisors = new JLabel("supervisors");
+		
 		
 		// Panel containing Name input field and send button 
 		// will be placed under the instruction panel
@@ -63,17 +68,29 @@ public class JavaClientGui implements ActionListener{
 		inputPanel.add(instructionText);
 		inputPanel.add(textInputPanel);
 		
-		// BOTTOM PANEL 
+		// CENTER PANEL - top part  
+		// contains current supervisors and there messages 
+		supervisorsPanel = new JPanel(); 
+		supervisorsPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+		availableSupervisors = new JLabel("supervisors");
+		supervisorsPanel.add(availableSupervisors);
+		
+		
+		// CENTER PANEL - bottom part
 		// Contains the current queue
-		
-		
 		queuePanel = new JPanel();
+		queuePanel.setBorder(BorderFactory.createLineBorder(Color.black));
 		queuePanel.setLayout(new BoxLayout(queuePanel, BoxLayout.Y_AXIS));
 		
+		// CENTER PANEL - Settup
+		centerPanel = new JPanel();
+		centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
+		centerPanel.add(availableSupervisors);
 		
 		// Frame setup
 		applicationFrame.add(inputPanel, BorderLayout.NORTH);
-		applicationFrame.add(queuePanel, BorderLayout.CENTER);
+		//applicationFrame.add(supervisorsPanel, BorderLayout.CENTER);
+		applicationFrame.add(centerPanel, BorderLayout.CENTER);
 		// Some more configuration might be needed 
 		applicationFrame.setSize(400, 800);
 		applicationFrame.setVisible(true);
@@ -104,8 +121,9 @@ public class JavaClientGui implements ActionListener{
 			
 			newQueueEntry.add(tempLabel);
 			queuePanel.add(newQueueEntry);
+			
 		});
-		
+		centerPanel.add(queuePanel);
 		applicationFrame.revalidate(); 
 		applicationFrame.repaint();
 	}

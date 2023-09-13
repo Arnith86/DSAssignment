@@ -30,7 +30,8 @@ public class JavaClient {
 		enterQueue(user);
 	}
 	
-	
+	// Will display available supervisors 
+	// Cannot test right now though... no supervisors present..
 	private Runnable getCurrentSupervisors() {
 		
 		supervisors = new LinkedList<Supervisors>();
