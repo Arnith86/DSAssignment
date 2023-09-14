@@ -72,8 +72,8 @@ public class JavaClientGui implements ActionListener{
 		// contains current supervisors and there messages 
 		supervisorsPanel = new JPanel(); 
 		supervisorsPanel.setBorder(BorderFactory.createLineBorder(Color.black));
-		availableSupervisors = new JLabel("supervisors");
-		supervisorsPanel.add(availableSupervisors);
+		//availableSupervisors = new JLabel("supervisors");
+		//supervisorsPanel.add(availableSupervisors);
 		
 		
 		// CENTER PANEL - bottom part
@@ -85,7 +85,7 @@ public class JavaClientGui implements ActionListener{
 		// CENTER PANEL - Setup
 		centerPanel = new JPanel();
 		centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
-		centerPanel.add(availableSupervisors);
+		//centerPanel.add(availableSupervisors);
 		
 		// Frame setup
 		applicationFrame.add(inputPanel, BorderLayout.NORTH);
@@ -124,8 +124,28 @@ public class JavaClientGui implements ActionListener{
 			
 		});
 		centerPanel.add(queuePanel);
+		// this will reprint the applicationFrame for bouth setStudentQueue and setCurrentSupervisors
 		applicationFrame.revalidate(); 
 		applicationFrame.repaint();
+	}
+
+	public void setCurrentSupervisors(LinkedList<Supervisors> superervisorList){
+		
+		supervisorsPanel.removeAll();
+
+		superervisorList.forEach(superervisors -> {
+			
+			if(superervisors.getStudentName().equals(null)){
+				availableSupervisors = new JLabel(superervisors.getSupervisorName()+": Status: "+superervisors.getStatus());
+			} else {
+				availableSupervisors = new JLabel(superervisors.getSupervisorName()+": Helping: "+superervisors.getStudentName());
+			}
+
+			supervisorsPanel.add(availableSupervisors);
+			
+		});	
+
+		centerPanel.add(supervisorsPanel);
 	}
 
 	// 
