@@ -46,7 +46,7 @@ public class JavaClient {
 			
 			String topic =  new String(subscriber.recv(), ZMQ.CHARSET);
 			//String msg =  new String(subscriber.recv(), ZMQ.CHARSET);
-			
+			System.out.println(topic);
 			
 			JSONArray jsonMsg = new JSONArray(new String(subscriber.recv(), ZMQ.CHARSET));
 			

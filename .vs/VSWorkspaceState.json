@@ -1,6 +1,10 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\C#",
+    "\\C#\\DSAssignmentC#",
+    "\\src"
   ],
+  "SelectedNode": "\\C#\\DSAssignmentC#\\DSAssignmentC#.sln",
   "PreviewInSolutionExplorer": false
 }

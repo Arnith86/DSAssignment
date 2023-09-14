@@ -2,6 +2,7 @@
 Jean-Paul Hanna: a21jeaha
 Adam Noble: c21adano
 
+## Client App
 Language used: Java 
 Package Manager: Maven
 Java Version: 17
@@ -22,3 +23,7 @@ Dependancyes:
     <version>20230618</version>
 </dependency>
 ```
+
+## Server
+Language used: C#
+DotNet version ?!?!? !#RDJ ?)#J 
