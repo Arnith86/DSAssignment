@@ -17,7 +17,7 @@ public class JavaClient {
 	private String user; 
 	private JavaClientGui gui; 
 	private LinkedList<Students> studentList;
-	private LinkedList<Supervisors> supervisors; 
+	private LinkedList<Supervisors> supervisorList; 
 	
 	public JavaClient (JavaClientGui gui){
 		// IN TESTING 
@@ -35,7 +35,7 @@ public class JavaClient {
 	// Cannot test right now though... no supervisors present..
 	private Runnable getCurrentSupervisors() {
 		
-		supervisors = new LinkedList<Supervisors>();
+		supervisorList = new LinkedList<Supervisors>();
 		
 		try(ZContext context = new ZContext()){
 			
@@ -46,7 +46,6 @@ public class JavaClient {
 			
 			String topic =  new String(subscriber.recv(), ZMQ.CHARSET);
 			//String msg =  new String(subscriber.recv(), ZMQ.CHARSET);
-			System.out.println(topic);
 			
 			JSONArray jsonMsg = new JSONArray(new String(subscriber.recv(), ZMQ.CHARSET));
 			
@@ -70,14 +69,16 @@ public class JavaClient {
 					map.put(key, supervisor.get(key));
 				}
 				String name = (String) map.get("name");
-				System.out.println("here");
-				System.out.println(name);
+				String status = (String) map.get("status");
+				String[] client = (String[]) map.get("client");
+				
+				System.out.println(name+" "+status+" "+client);
 				// extract the value "name" and "ticket" from object and create a new object using that value
 				// these are placed in a linked list.
 //				String name = (String) map.get("name");
 //				int ticket = (int) map.get("ticket");
-//				Students studentObject = new Students(name, ticket);
-//				studentList.add(studentObject);
+				Supervisors supervisorsObject = new Supervisors(name, status, client);
+				supervisorList.add(supervisorsObject);
 			}
 			
 			//gui.setCurrentSupervisors(studentList); THIS METHOD DOES NOT EXIST YET 
