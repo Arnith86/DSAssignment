@@ -25,16 +25,30 @@ public class JavaClientGui implements ActionListener{
 	private JavaClient javaClient = new JavaClient(this);
 	
 	private JLabel instructionText; 
-	private JLabel availableSupervisors;   // NOT USED YET 
+	private JLabel availableSupervisors;   
 	
 	private JFrame applicationFrame;
 	
 	private JPanel inputPanel;
+	// IMPLEMENT THE ADDRESS PANEL !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+	private JPanel addressPanel;
+	private JLabel serverLabel; 
+	private JTextField addressInput;
+	private JPanel portPanel;
+	private JPanel inPortPanel;
+	private JPanel outPortPanel; 
+	private JLabel inPortLabel;
+	private JLabel outPortLabel; 
+	private JTextField portInInput;
+	private JTextField portOutInput;
+	private JButton applyButton; 
+
 	private JPanel textInputPanel; 
 	private JTextField nameInput; 
 	private JButton sendButton;
 	
-	private JPanel supervisorsPanel;    // NOT USED YET 
+	private JPanel supervisorsPanel;    
 	
 	private JPanel centerPanel;
 	
@@ -48,14 +62,40 @@ public class JavaClientGui implements ActionListener{
 		
 		
 		// TOP PANEL  
-		// contains, instructions and name input	
+		// contains, instructions, address inputs and name input	
 		inputPanel = new JPanel(); 
 		inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.Y_AXIS));
 		inputPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 		
 		instructionText = new JLabel("Supply your name and press the send button!");
 		
+		// Panel containing server address and port input fields and apply button
+		addressPanel = new JPanel();
+		serverLabel = new JLabel("Server: ");
+		addressInput = new JTextField("Address");
+		inPortLabel = new JLabel("Port in: ");
+		portInInput = new JTextField("5555");
+		outPortLabel = new JLabel("Port out: ");
+		portOutInput = new JTextField("5556");
+		applyButton = new JButton("Apply");
+
+		inPortPanel = new JPanel();
+		outPortPanel = new JPanel(); 
+		inPortPanel.add(inPortLabel);
+		inPortPanel.add(portInInput);
+		outPortPanel.add(outPortLabel);
+		outPortPanel.add(portOutInput);
 		
+		portPanel = new JPanel();
+		portPanel.setLayout(new BoxLayout(portPanel, BoxLayout.Y_AXIS));
+		portPanel.add(inPortPanel);
+		portPanel.add(outPortPanel);
+
+		addressPanel.add(serverLabel);
+		addressPanel.add(addressInput);
+		addressPanel.add(portPanel);
+		addressPanel.add(applyButton);
+
 		// Panel containing Name input field and send button 
 		// will be placed under the instruction panel
 		textInputPanel = new JPanel();
@@ -65,7 +105,8 @@ public class JavaClientGui implements ActionListener{
 		textInputPanel.add(nameInput);
 		textInputPanel.add(sendButton);
 		
-		inputPanel.add(instructionText);
+		inputPanel.add(addressPanel);
+		//inputPanel.add(instructionText);
 		inputPanel.add(textInputPanel);
 		
 		// CENTER PANEL - top part  
