@@ -12,9 +12,13 @@ public class JavaClientHeartbeatTread implements Runnable {
 	
 	private String user;
 	private String UID; 
+	private String serverAddress;
+	private int outPort;
 	
-	public JavaClientHeartbeatTread (String user){  // UID needs to be received when we figure out what it should be..
+	public JavaClientHeartbeatTread (String user, String serverAddress, int outPort){  // UID needs to be received when we figure out what it should be..
 		this.user = user; 
+		this.serverAddress = serverAddress;
+		this.outPort = outPort;
 	}
 	
 	
@@ -22,10 +26,10 @@ public class JavaClientHeartbeatTread implements Runnable {
 	public void run() {
 		ScheduledExecutorService pulseHeartbeat;
 		pulseHeartbeat = Executors.newScheduledThreadPool(1);
-		pulseHeartbeat.scheduleWithFixedDelay(() -> heartbeat(user), 2000 , 2000 , TimeUnit.MILLISECONDS);
+		pulseHeartbeat.scheduleWithFixedDelay(() -> heartbeat(), 2000 , 2000 , TimeUnit.MILLISECONDS);
 	}
 	
-	private Runnable heartbeat(String user) {
+	private Runnable heartbeat() {
 		
 		String heartBeat = "{\r\n"
 				+ "    \"name\": \""+user+"\",\r\n"
@@ -35,7 +39,7 @@ public class JavaClientHeartbeatTread implements Runnable {
 		try(ZContext context = new ZContext()){
 			
 			ZMQ.Socket socket = context.createSocket(SocketType.REQ); 
-			socket.connect("tcp://ds.iit.his.se:5556");
+			socket.connect(/* "tcp://ds.iit.his.se:5556"*/ "tcp://"+serverAddress+":"+outPort );
 			socket.send(heartBeat.getBytes(ZMQ.CHARSET),0);
 			byte[] reply = socket.recv(0); 
 			

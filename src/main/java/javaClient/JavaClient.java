@@ -14,105 +14,128 @@ import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
 
 public class JavaClient {
-	private String user = null; 
+	
+	private String user;
+	private String serverAddress;
+	private int inPortNummber;
+	private int outPortNummber;
+
+	private Boolean fullAddressSupplied;
+
 	private JavaClientGui gui; 
 	private LinkedList<Students> studentList;
 	private LinkedList<Supervisors> supervisorList; 
 	
 	public JavaClient (JavaClientGui gui){
 		// IN TESTING 
-		this.gui = gui; 
+		this.gui = gui;
+		fullAddressSupplied = false;  
 	}
 	
 	
 	public void setUser(String user) {
 		this.user=user; 
-		enterQueue(user);
+		enterQueue(user,serverAddress, outPortNummber);
+	}
+
+	public void setAddressAndPorts(String address, int inPort, int outPort){
+		serverAddress = address;
+		inPortNummber = inPort;
+		outPortNummber = outPort;
+
+		getCurrentQueue(address, inPort);
 	}
 	
 	// Will display available supervisors 
-	// STILL IN EARLY TESTING !!!!!!!!!!!!!!!!
+	// STILL IN TESTING !!!!!!!!!!!!!!!!
 	// Cannot test right now though... no supervisors present..
 	private Runnable getCurrentSupervisors() {
+		if (fullAddressSupplied == true){
 
-		supervisorList = new LinkedList<Supervisors>();
 		
-		try(ZContext context = new ZContext()){
+			supervisorList = new LinkedList<Supervisors>();
 			
-			// gets the list of Current Supervisors
-			ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
-			subscriber.connect("tcp://ds.iit.his.se:5555");
-			subscriber.subscribe("supervisors");
-			
-			String topic =  new String(subscriber.recv(), ZMQ.CHARSET);
-			//String msg =  new String(subscriber.recv(), ZMQ.CHARSET);
-			
-			JSONArray jsonMsg = new JSONArray(new String(subscriber.recv(), ZMQ.CHARSET));
+			try(ZContext context = new ZContext()){
 				
+				// gets the list of Current Supervisors
+				ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
+				subscriber.connect(/* tcp://ds.iit.his.se:5555"*/"tcp://"+serverAddress+":"+inPortNummber);
+				subscriber.subscribe("supervisors");
+				
+				String topic =  new String(subscriber.recv(), ZMQ.CHARSET);
+				//String msg =  new String(subscriber.recv(), ZMQ.CHARSET);
+				
+				JSONArray jsonMsg = new JSONArray(new String(subscriber.recv(), ZMQ.CHARSET));
 					
-			// extracts the String value name from json objects housed in the jsonarray
-			for (int i = 0; i < jsonMsg.length(); i++) {
-			
-				// converts Json array elements into Json objects 
-				JSONObject supervisor = new JSONObject(jsonMsg.get(i).toString());
-				HashMap<String, Object> map = new HashMap<>();
-				Iterator<String> iter = supervisor.keys();
+						
+				// extracts the String value name from json objects housed in the jsonarray
+				for (int i = 0; i < jsonMsg.length(); i++) {
 				
-				// makes a hashmap out of the JSONobject
-				// THIS METHOD SHOULD BE A SINGLE METHOD 
-				while(iter.hasNext()) { 
-   					String key = iter.next();
-					map.put(key, supervisor.get(key));
+					// converts Json array elements into Json objects 
+					JSONObject supervisor = new JSONObject(jsonMsg.get(i).toString());
+					HashMap<String, Object> map = new HashMap<>();
+					Iterator<String> iter = supervisor.keys();
+					
+					// makes a hashmap out of the JSONobject
+					// THIS METHOD SHOULD BE A SINGLE METHOD 
+					while(iter.hasNext()) { 
+						String key = iter.next();
+						map.put(key, supervisor.get(key));
+					}
+
+					String name = (String) map.get("name");
+					String status = (String) map.get("status");
+					JSONObject client = (JSONObject) map.get("client");
+
+					Supervisors supervisorsObject = new Supervisors(name, status);
+
+					if (!client.isEmpty()){
+						supervisorsObject.setSupervising(client);
+					}
+
+					supervisorList.add(supervisorsObject);
+					
+					// checks if there is a message for the user 
+					// STILL IN EARLY TESTING !!!!!!!!!!!!!!!!
+					
+					// TRY CATCH THAT BITCH 
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+					if(client.get("name").equals(user)) {
+						System.out.println("SHLIBDIB");	
+						System.out.println("tralalalaa");
+						ZMQ.Socket supervisorMessage = context.createSocket(SocketType.SUB);
+						supervisorMessage.connect(/*"tcp://ds.iit.his.se:5555"*/"tcp://"+serverAddress+":"+inPortNummber);
+						supervisorMessage.subscribe(user);
+						
+		//				{
+		//				    "supervisor":"<name of supervisor>",
+		//				    "message":"<message from supervisor>"
+		//				}
+						
+						JSONObject supervisorMsgObject = new JSONObject(new String(supervisorMessage.recv(), ZMQ.CHARSET));
+						System.out.println("supervisor message: "+supervisorMsgObject);
+					}
 				}
-
-				String name = (String) map.get("name");
-				String status = (String) map.get("status");
-				JSONObject client = (JSONObject) map.get("client");
 				
-				Supervisors supervisorsObject = new Supervisors(name, status);
-
-				if (!client.isEmpty()){
-					supervisorsObject.setSupervising(client);
-				}
-
-				supervisorList.add(supervisorsObject);
+				gui.setCurrentSupervisors(supervisorList);  // this should be moved to the end of the method when it is finisehed 
 				
-				// checks if there is a message for the user 
-				// STILL IN EARLY TESTING !!!!!!!!!!!!!!!!
-	// 			if((user != null) ) {
-					
-	// 				System.out.println("tralalalaa");
-	// 				ZMQ.Socket supervisorMessage = context.createSocket(SocketType.SUB);
-	// 				supervisorMessage.connect("tcp://ds.iit.his.se:5555");
-	// 				supervisorMessage.subscribe(user);
-					
-	// //				{
-	// //				    "supervisor":"<name of supervisor>",
-	// //				    "message":"<message from supervisor>"
-	// //				}
-					
-	// 				JSONObject supervisorMsgObject = new JSONObject(new String(supervisorMessage.recv(), ZMQ.CHARSET));
-	// 				System.out.println("supervisor message: "+supervisorMsgObject);
-	// 			}
+			
+				
+				context.close();
 			}
-			
-			gui.setCurrentSupervisors(supervisorList);  // this should be moved to the end of the method when it is finisehed 
-			
-		
-			
-			context.close();
-		}
-		
+		}	
 		return null; 
 	}
 	
-	private Runnable getCurrentQueue() {
+	private Runnable getCurrentQueue(String address, int inPort) {
 		
 		studentList = new LinkedList<Students>();
 		
 		try(ZContext context = new ZContext()){
 			ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
-			subscriber.connect("tcp://ds.iit.his.se:5555");
+			subscriber.connect(/* "tcp://ds.iit.his.se:5555"*/  "tcp://"+address+":"+inPort);
 			subscriber.subscribe("queue");
 			
 			String topic =  new String(subscriber.recv(), ZMQ.CHARSET);
@@ -147,14 +170,14 @@ public class JavaClient {
 		return null; 
 	}
 	
-	// places supplied user in the TinyQueue 
+	// places supplied user in the server queue 
 	// TODO!!!!!   WE NEED TO CREATE A UID SOMEHOW!!!!!!!!!!!!!!!!!!!!!!
-	private void enterQueue(String user) {
+	private void enterQueue(String user, String address, int outPort) {
 		
 		try(ZContext context = new ZContext()){
 			
 			ZMQ.Socket socket = context.createSocket(SocketType.REQ); 
-			socket.connect("tcp://ds.iit.his.se:5556");
+			socket.connect(/*"tcp://ds.iit.his.se:5556" */ "tcp://"+address+":"+outPort);
 			
 			String enterQueue = "{\"enterQueue\": true, \"name\": \""+user+"\", \"clientId\": \"JP\"}";
 			
@@ -165,7 +188,7 @@ public class JavaClient {
 			System.out.println("this was recived: " + new String(reply, ZMQ.CHARSET));  // this should not be written out when application is finished only receive the reply 
 			
 			// IN TESTING 
-			JavaClientHeartbeatTread heartbeat = new JavaClientHeartbeatTread(user);
+			JavaClientHeartbeatTread heartbeat = new JavaClientHeartbeatTread(user, address, outPort);
 			Thread heartbeatThread = new Thread(heartbeat);
 			heartbeatThread.start(); 
 			// IN TESTING 
@@ -173,16 +196,18 @@ public class JavaClient {
 		}
 		
 	}
+
+
 	
 	public static void main(String[] args) {
 		
 		JavaClientGui gui = new JavaClientGui(); 
 		
 		JavaClient javaClient = new JavaClient(gui);
-		ScheduledExecutorService queueUpdater;
-		queueUpdater = Executors.newScheduledThreadPool(1);
-		queueUpdater.scheduleWithFixedDelay(() -> javaClient.getCurrentQueue(), 0 , 500 , TimeUnit.MILLISECONDS);
-		queueUpdater.scheduleWithFixedDelay(() -> javaClient.getCurrentSupervisors(), 0 , 500 , TimeUnit.MILLISECONDS);
+		// ScheduledExecutorService queueUpdater;
+		// queueUpdater = Executors.newScheduledThreadPool(1);
+		// queueUpdater.scheduleWithFixedDelay(() -> javaClient.getCurrentQueue(), 0 , 500 , TimeUnit.MILLISECONDS);
+		// queueUpdater.scheduleWithFixedDelay(() -> javaClient.getCurrentSupervisors(), 0 , 500 , TimeUnit.MILLISECONDS);
 		
 	}
 	

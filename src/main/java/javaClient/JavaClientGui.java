@@ -21,7 +21,12 @@ public class JavaClientGui implements ActionListener{
 	// used for test on  the GUI, should be removed when the implementation is finished
 	
 	private String user; 
-	
+	private String serverAddress;
+	private int inPort; 
+	private int outPort; 
+
+	private Boolean fullAddressSupplied;
+
 	private JavaClient javaClient = new JavaClient(this);
 	
 	private JLabel instructionText; 
@@ -42,7 +47,7 @@ public class JavaClientGui implements ActionListener{
 	private JLabel outPortLabel; 
 	private JTextField portInInput;
 	private JTextField portOutInput;
-	private JButton applyButton; 
+	private JButton connectButton; 
 
 	private JPanel textInputPanel; 
 	private JTextField nameInput; 
@@ -57,6 +62,9 @@ public class JavaClientGui implements ActionListener{
 	
 	
 	public JavaClientGui () {
+
+		fullAddressSupplied = false; 
+
 		
 		applicationFrame = new JFrame("Queue");
 		
@@ -77,7 +85,7 @@ public class JavaClientGui implements ActionListener{
 		portInInput = new JTextField("5555");
 		outPortLabel = new JLabel("Port out: ");
 		portOutInput = new JTextField("5556");
-		applyButton = new JButton("Apply");
+		connectButton = new JButton("Connect");
 
 		inPortPanel = new JPanel();
 		outPortPanel = new JPanel(); 
@@ -94,7 +102,7 @@ public class JavaClientGui implements ActionListener{
 		addressPanel.add(serverLabel);
 		addressPanel.add(addressInput);
 		addressPanel.add(portPanel);
-		addressPanel.add(applyButton);
+		addressPanel.add(connectButton);
 
 		// Panel containing Name input field and send button 
 		// will be placed under the instruction panel
@@ -138,6 +146,7 @@ public class JavaClientGui implements ActionListener{
 		applicationFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		sendButton.addActionListener(this);
+		connectButton.addActionListener(this);
 	}
 	
 	public void setStudentQueue(LinkedList<Students> studentList){
@@ -192,11 +201,42 @@ public class JavaClientGui implements ActionListener{
 	// 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		
 		// registers supplied name, and initiates placement in queue
 		if (e.getSource().equals(sendButton)) {
-			String textNameInput = nameInput.getText();
-			this.user = textNameInput;
-			javaClient.setUser(user);
+			
+			if(fullAddressSupplied == true){
+				this.user = nameInput.getText();
+				 
+				// String textNameInput = nameInput.getText();
+				// this.user = textNameInput;
+				javaClient.setUser(user);
+			}
+		
+		}
+
+		// regesters the values for server address and selected ports
+		if (e.getSource().equals(connectButton)) {
+			
+			// THESE INPUTS NEEDS TO BE FAULT TOLARENT !	
+			// IT SHOULD HAVE AN WORKING IF STATEMENT THAT CHECKS THAT ALL INPUTS WERE RECIVED CORRECTLY 
+			this.serverAddress = addressInput.getText();
+						
+			try {
+				this.inPort = Integer.valueOf(portInInput.getText());    // NEEDS TO BE FAULT TOLARENT !	
+			} catch (NumberFormatException ex) {
+				ex.printStackTrace();
+			}
+
+			try {
+				this.outPort = Integer.valueOf(portOutInput.getText());    // NEEDS TO BE FAULT TOLARENT !	
+			} catch (NumberFormatException ex) {
+				ex.printStackTrace();
+			}
+
+			javaClient.setAddressAndPorts(serverAddress, inPort, outPort);
+
+			fullAddressSupplied = true; // THE BEFORE MENTIONED IF STATEMENT SHOULD BE TRUE BEFORE THIS IS APPLIED
 		}
 		
 	}
