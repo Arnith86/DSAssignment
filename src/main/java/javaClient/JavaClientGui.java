@@ -179,6 +179,8 @@ public class JavaClientGui implements ActionListener{
 		applicationFrame.repaint();
 	}
 
+	
+
 	public void setCurrentSupervisors(LinkedList<Supervisors> superervisorList){
 		
 		supervisorsPanel.removeAll();

@@ -43,7 +43,10 @@ public class JavaClient {
 		inPortNummber = inPort;
 		outPortNummber = outPort;
 
-		getCurrentQueue(address, inPort);
+		ScheduledExecutorService queueUpdater;
+		queueUpdater = Executors.newScheduledThreadPool(1);
+		queueUpdater.scheduleWithFixedDelay(() -> getCurrentQueue(), 0 , 500 , TimeUnit.MILLISECONDS);
+		// getCurrentQueue();
 	}
 	
 	// Will display available supervisors 
@@ -129,13 +132,13 @@ public class JavaClient {
 		return null; 
 	}
 	
-	private Runnable getCurrentQueue(String address, int inPort) {
+	private Runnable getCurrentQueue(/*String address, int inPort*/) {
 		
 		studentList = new LinkedList<Students>();
 		
 		try(ZContext context = new ZContext()){
 			ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
-			subscriber.connect(/* "tcp://ds.iit.his.se:5555"*/  "tcp://"+address+":"+inPort);
+			subscriber.connect(/* "tcp://ds.iit.his.se:5555"*/  "tcp://"+serverAddress+":"+inPortNummber);
 			subscriber.subscribe("queue");
 			
 			String topic =  new String(subscriber.recv(), ZMQ.CHARSET);
@@ -207,7 +210,7 @@ public class JavaClient {
 		// ScheduledExecutorService queueUpdater;
 		// queueUpdater = Executors.newScheduledThreadPool(1);
 		// queueUpdater.scheduleWithFixedDelay(() -> javaClient.getCurrentQueue(), 0 , 500 , TimeUnit.MILLISECONDS);
-		// queueUpdater.scheduleWithFixedDelay(() -> javaClient.getCurrentSupervisors(), 0 , 500 , TimeUnit.MILLISECONDS);
+		//queueUpdater.scheduleWithFixedDelay(() -> javaClient.getCurrentSupervisors(), 0 , 500 , TimeUnit.MILLISECONDS);
 		
 	}
 	
