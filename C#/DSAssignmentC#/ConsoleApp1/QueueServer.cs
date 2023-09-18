@@ -11,6 +11,7 @@ namespace QueueServerNameSpace{
 
         //Dictionary that hold the queue list
         static SortedDictionary<int, string> queueList = new SortedDictionary<int, string>();
+        static Dictionary<string, int> heartbeatDic = new Dictionary<string, int>();
         public static void sendList()
         {
             
@@ -18,6 +19,9 @@ namespace QueueServerNameSpace{
             queueList.Add(2, "Two");
             queueList.Add(3, "Three");
             queueList.Add(1, "One");
+            heartbeatDic.Add("Two", 4);
+            heartbeatDic.Add("Three", 4);
+            heartbeatDic.Add("One", 4);
             foreach (var kvp in queueList)
             {
                 Console.WriteLine("ticket = {0}, name = {1}", kvp.Key, kvp.Value);
@@ -60,7 +64,7 @@ namespace QueueServerNameSpace{
                 {
                     Thread removeFromListThread = new Thread(removeFromList);
                     string msg = server.ReceiveFrameString();
-                    Console.WriteLine("From Client: {0}", msg);
+                    //Console.WriteLine("From Client: {0}", msg);
                     //server.SendFrame("{}");
 
                     
@@ -71,51 +75,35 @@ namespace QueueServerNameSpace{
                         var maxKey = queueList.Keys.Max();
                         int newMaxKey = maxKey + 1;
                         queueList.Add(newMaxKey, studentName);
+                        heartbeatDic.Add(studentName, 4);
                         removeFromListThread.Start(newMaxKey);
 
                         server.SendFrame("{\"ticket\": " + newMaxKey + ", \"name\": \"" + studentName + "\"}");
                     }
-                    else
+                    else if (queueList.ContainsValue(studentName))
                     {
-                        Console.WriteLine(studentName + " was already in the list");
+                        heartbeatDic[studentName] = 4;
+                        //removeFromList(1);
+                        //removeFromList(4);
+                        Console.WriteLine("test");
+                        Console.WriteLine(heartbeatDic[studentName]);
                         server.SendFrame("{}");
                     }
+                    else
+                    {
+                        server.SendFrame("{}");
+                    }
+
                 }
             }
         }
 
         public static void removeFromList(object keyValue)
         {
-
-            Console.WriteLine("new key added to list:" + keyValue);
-            int timeLeft = 4;
-            string nameToCheck = queueList[(int)keyValue];
-            Console.WriteLine("test:" + nameToCheck);
-            //string msg = server.ReceiveFrameString();
-            //dynamic jsonObj = JsonConvert.DeserializeObject(msg);
-            //string studentName = jsonObj.name;
-
-            //if (nameToCheck == studentName)
-            //{
-            //    //server.SendFrame("{}");
-            //}
-           // else if (timeLeft < 0)
-            {
-
-            }
-            //heartbeat listener, plan is to start a thread/algorithm that checks every index for a match from heartbeat.
-            //if no match is found after 4 seconds delete the index
-
-            //removes object with key 1 from ditonary
-            //queueList.Remove(1);
-
-            //foreach(KeyValuePair<int, string> entry in  queueList)
-            //{
-            //    Console.WriteLine(entry.Value);
-            // }
-
-            //server.SendFrame("{}");
             
+
+        Console.WriteLine("new key added to list:" + keyValue);
+        
         }
     }
 }
