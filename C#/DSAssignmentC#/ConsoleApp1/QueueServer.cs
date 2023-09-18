@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System.Text.Json.Serialization;
 using NetMQ.Sockets;
 using NetMQ;
+using System.Drawing.Text;
 
 namespace QueueServerNameSpace{
     static partial class QueueServer{
@@ -34,14 +35,14 @@ namespace QueueServerNameSpace{
 
                         static string MyDictionaryToJson(IDictionary<int, string> dict)
                         {
-
-                            var x = dict.Select(d =>
+                        Thread.Sleep(3);
+                        var x = dict.Select(d =>
                                 string.Format("\"ticket\": {0}, \"name\": \"{1}\"", d.Key, string.Join(",", d.Value)));
                             return "[{" + string.Join("},{", x) + "}]";
                         }
                         string js2 = MyDictionaryToJson(queueList);
                         pub.SendMoreFrame("queue").SendFrame(js2);// Message
-                        Console.WriteLine("lmao");
+                        //Console.WriteLine("lmao");
 
                     }
 
@@ -60,8 +61,9 @@ namespace QueueServerNameSpace{
                     Thread removeFromListThread = new Thread(removeFromList);
                     string msg = server.ReceiveFrameString();
                     Console.WriteLine("From Client: {0}", msg);
-                    server.SendFrame("{}");
+                    //server.SendFrame("{}");
 
+                    
                     dynamic jsonObj = JsonConvert.DeserializeObject(msg);
                     string studentName = jsonObj.name;
                     if (!(queueList.ContainsValue(studentName)))
@@ -70,11 +72,13 @@ namespace QueueServerNameSpace{
                         int newMaxKey = maxKey + 1;
                         queueList.Add(newMaxKey, studentName);
                         removeFromListThread.Start(newMaxKey);
-                        
+
+                        server.SendFrame("{\"ticket\": " + newMaxKey + ", \"name\": \"" + studentName + "\"}");
                     }
                     else
                     {
                         Console.WriteLine(studentName + " was already in the list");
+                        server.SendFrame("{}");
                     }
                 }
             }
@@ -82,6 +86,23 @@ namespace QueueServerNameSpace{
 
         public static void removeFromList(object keyValue)
         {
+
+            Console.WriteLine("new key added to list:" + keyValue);
+            int timeLeft = 4;
+            string nameToCheck = queueList[(int)keyValue];
+            Console.WriteLine("test:" + nameToCheck);
+            //string msg = server.ReceiveFrameString();
+            //dynamic jsonObj = JsonConvert.DeserializeObject(msg);
+            //string studentName = jsonObj.name;
+
+            //if (nameToCheck == studentName)
+            //{
+            //    //server.SendFrame("{}");
+            //}
+           // else if (timeLeft < 0)
+            {
+
+            }
             //heartbeat listener, plan is to start a thread/algorithm that checks every index for a match from heartbeat.
             //if no match is found after 4 seconds delete the index
 
@@ -92,7 +113,9 @@ namespace QueueServerNameSpace{
             //{
             //    Console.WriteLine(entry.Value);
             // }
-            Console.WriteLine("new key added to list:" + keyValue);
+
+            //server.SendFrame("{}");
+            
         }
     }
 }
