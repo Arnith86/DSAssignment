@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 using NetMQ.Sockets;
 using NetMQ;
 using System.Drawing.Text;
+using System.Collections;
 
 namespace QueueServerNameSpace{
     static partial class QueueServer{
@@ -19,9 +20,9 @@ namespace QueueServerNameSpace{
             queueList.Add(2, "Two");
             queueList.Add(3, "Three");
             queueList.Add(1, "One");
-            heartbeatDic.Add("Two", 4);
-            heartbeatDic.Add("Three", 4);
-            heartbeatDic.Add("One", 4);
+            heartbeatDic.Add("One", 40);
+            heartbeatDic.Add("Two", 400);
+            heartbeatDic.Add("Three", 400);
             foreach (var kvp in queueList)
             {
                 Console.WriteLine("ticket = {0}, name = {1}", kvp.Key, kvp.Value);
@@ -30,24 +31,28 @@ namespace QueueServerNameSpace{
            
                 Thread addToListThread = new Thread(new ThreadStart(addToList));
                 addToListThread.Start();
-                using (var pub = new PublisherSocket())
+                Thread countdownThread = new Thread(countdown);
+                countdownThread.Start();
+            using (var pub = new PublisherSocket())
                 {
                     pub.Bind("tcp://*:5555");
                     while (true)
                     {
 
-
+                    lock (queueList)
+                    {
                         static string MyDictionaryToJson(IDictionary<int, string> dict)
                         {
-                        Thread.Sleep(3);
-                        var x = dict.Select(d =>
-                                string.Format("\"ticket\": {0}, \"name\": \"{1}\"", d.Key, string.Join(",", d.Value)));
+
+                            //Thread.Sleep(3);
+                            var x = dict.Select(d =>
+                                    string.Format("\"ticket\": {0}, \"name\": \"{1}\"", d.Key, string.Join(",", d.Value)));
                             return "[{" + string.Join("},{", x) + "}]";
                         }
                         string js2 = MyDictionaryToJson(queueList);
                         pub.SendMoreFrame("queue").SendFrame(js2);// Message
-                        //Console.WriteLine("lmao");
-
+                                                                  //Console.WriteLine("lmao");
+                    }
                     }
 
                 }  
@@ -70,24 +75,34 @@ namespace QueueServerNameSpace{
                     
                     dynamic jsonObj = JsonConvert.DeserializeObject(msg);
                     string studentName = jsonObj.name;
+                    Console.WriteLine(jsonObj);
                     if (!(queueList.ContainsValue(studentName)))
                     {
-                        var maxKey = queueList.Keys.Max();
-                        int newMaxKey = maxKey + 1;
-                        queueList.Add(newMaxKey, studentName);
-                        heartbeatDic.Add(studentName, 4);
-                        removeFromListThread.Start(newMaxKey);
+                        lock (queueList)
+                        {
+                            lock (heartbeatDic)
+                            {
+                                var maxKey = queueList.Keys.Max();
+                                int newMaxKey = maxKey + 1;
+                                queueList.Add(newMaxKey, studentName);
+                                heartbeatDic.Add(studentName, 4);
 
-                        server.SendFrame("{\"ticket\": " + newMaxKey + ", \"name\": \"" + studentName + "\"}");
+
+                                server.SendFrame("{\"ticket\": " + newMaxKey + ", \"name\": \"" + studentName + "\"}");
+                            }
+                        }
                     }
                     else if (queueList.ContainsValue(studentName))
                     {
-                        heartbeatDic[studentName] = 4;
-                        //removeFromList(1);
-                        //removeFromList(4);
-                        Console.WriteLine("test");
-                        Console.WriteLine(heartbeatDic[studentName]);
-                        server.SendFrame("{}");
+                        lock (heartbeatDic)
+                        {
+                            heartbeatDic[studentName] = 4;
+                            //removeFromList(1);
+                            //removeFromList(4);
+                           // Console.WriteLine(studentName + " " +heartbeatDic[studentName]);
+                            server.SendFrame("{}");
+                        }
+
                     }
                     else
                     {
@@ -97,13 +112,46 @@ namespace QueueServerNameSpace{
                 }
             }
         }
-
-        public static void removeFromList(object keyValue)
+        public static void countdown()
         {
-            
+            Thread removeFromListThread = new Thread(removeFromList);
+            string removedStudent;
+            while (true)
+            {
+                foreach (KeyValuePair<string, int> pair in heartbeatDic)
+                {
+                    if (pair.Value <= 0)
+                    {
+                        lock (queueList)
+                        {
+                            lock (heartbeatDic)
+                            {
+                            removedStudent = pair.Key;
+                                
+                            var itemsToRemove = queueList.Where(f => f.Value == removedStudent).ToArray();
+                            foreach (var item in itemsToRemove)
+                                queueList.Remove(item.Key);
+                            heartbeatDic.Remove((string)removedStudent);
+                            // queueList.Remove(pa.Key);
+                                    
+                            }
+                        }
 
-        Console.WriteLine("new key added to list:" + keyValue);
-        
+                    }
+                    else
+                    {
+                        removedStudent = pair.Key;
+                        heartbeatDic[pair.Key] = heartbeatDic[pair.Key] - 1;
+                        //Console.WriteLine(removedStudent +" : "+ heartbeatDic[pair.Key]);
+                    }
+                }
+                Thread.Sleep(1000);
+            }
+        }
+        public static void removeFromList(object removedStudent)
+        {
+
+                    
         }
     }
 }
