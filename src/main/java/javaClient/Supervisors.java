@@ -6,9 +6,10 @@ public class Supervisors {
 	
 	private String name; 
 	private String status; 
-	
+	private String undefined = "undefined";
 	private String studentName;
-	private int studentTickit; 
+	private int studentTickit;
+	private String message;  
 	
 	public Supervisors(String name, String status) {
 
@@ -21,6 +22,14 @@ public class Supervisors {
 
 		this.studentName = client.getString("name");
 		this.studentTickit = client.getInt("ticket"); 
+	}
+
+	public void setSupervisorMessage(String message){
+		this.message = message;
+	}
+
+	public void setSupervising() {
+		this.studentName = undefined;
 	}
 
 	public String getSupervisorName(){

@@ -119,7 +119,8 @@ public class JavaClientGui implements ActionListener{
 		
 		// CENTER PANEL - top part  
 		// contains current supervisors and there messages 
-		supervisorsPanel = new JPanel(); 
+		supervisorsPanel = new JPanel();
+		supervisorsPanel.setLayout(new BoxLayout(supervisorsPanel, BoxLayout.Y_AXIS)); 
 		supervisorsPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 		//availableSupervisors = new JLabel("supervisors");
 		//supervisorsPanel.add(availableSupervisors);
@@ -185,19 +186,28 @@ public class JavaClientGui implements ActionListener{
 		
 		supervisorsPanel.removeAll();
 
-		superervisorList.forEach(superervisors -> {
+		if(superervisorList.size() == 0){
 			
-			if(superervisors.getStudentName().equals(null)){
-				availableSupervisors = new JLabel(superervisors.getSupervisorName()+": Status: "+superervisors.getStatus());
-			} else {
-				availableSupervisors = new JLabel(superervisors.getSupervisorName()+": Helping: "+superervisors.getStudentName());
-			}
-
+			availableSupervisors = new JLabel("There are no supervisors:");
 			supervisorsPanel.add(availableSupervisors);
+
+		} else {
 			
-		});	
+			superervisorList.forEach(superervisors -> {
+			
+				if(superervisors.getStudentName().equals(null)){
+					availableSupervisors = new JLabel(superervisors.getSupervisorName()+": Status: "+superervisors.getStatus());
+				} else {
+					availableSupervisors = new JLabel(superervisors.getSupervisorName()+": Helping: "+superervisors.getStudentName());
+				}
+				supervisorsPanel.add(availableSupervisors);
+			});
+		}
+			
 
 		centerPanel.add(supervisorsPanel);
+		 // applicationFrame.revalidate(); 
+		 // applicationFrame.repaint();
 	}
 
 	// 
