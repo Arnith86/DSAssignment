@@ -17,10 +17,10 @@ import org.zeromq.ZMQ;
 public class JavaClient {
 
 	private static String undefined = "undefined";
-	private String user;
-	private String serverAddress;
-	private int inPortNummber;
-	private int outPortNummber;
+	protected String user;
+	protected String serverAddress;
+	protected int inPortNummber;
+	protected int outPortNummber;
 
 	private Boolean fullAddressSupplied;
 

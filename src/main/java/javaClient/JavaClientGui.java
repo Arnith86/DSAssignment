@@ -27,15 +27,15 @@ public class JavaClientGui implements ActionListener{
 	protected String kindOfClient;
 	private String supervisorString = "supervisor";
 	private String supervisorStatusInputArray[] = {"", "pending", "available","occupied"};
-	private String user=""; 
-	private String serverAddress;
-	private int inPort; 
-	private int outPort; 
+	private static String user=""; 
+	private static String serverAddress;
+	private static int inPort; 
+	private static int outPort; 
 
 	private Boolean fullAddressSupplied;
 
-	private JavaClient javaClient = new JavaClient(this);
-	private SupervisorJavaClient supervisorJavaClient = new SupervisorJavaClient(this);
+	private JavaClient javaClient;// = new JavaClient(this);
+	private SupervisorJavaClient supervisorJavaClient; // = new SupervisorJavaClient(this);
 	
 	private JLabel instructionText; 
 	private JLabel availableSupervisors;   
@@ -78,6 +78,13 @@ public class JavaClientGui implements ActionListener{
 	private JPanel queuePanel; 
 	private JPanel newQueueEntry; 
 	
+	public void setSupervisorClientObject(SupervisorJavaClient supervisorJavaClient){
+		this.supervisorJavaClient = supervisorJavaClient;
+	}
+	
+	public void setClientObject(JavaClient client){
+		this.javaClient = client;
+	}
 	
 	public JavaClientGui (String kindOfClient) {
 
@@ -269,10 +276,12 @@ public class JavaClientGui implements ActionListener{
 				 
 				// String textNameInput = nameInput.getText();
 				// this.user = textNameInput;
-				javaClient.setUser(user);
+				
 				if(kindOfClient.equals(supervisorString)){
+					supervisorJavaClient.setUser(user);
 					supervisorJavaClient.placeInQueue();
 				} else {
+					javaClient.setUser(user);
 					javaClient.placeInQueue();
 				}
 				
@@ -299,7 +308,12 @@ public class JavaClientGui implements ActionListener{
 				ex.printStackTrace();
 			}
 
-			javaClient.setAddressAndPorts(serverAddress, inPort, outPort);
+			if(kindOfClient.equals(supervisorString)){
+					supervisorJavaClient.setAddressAndPorts(serverAddress, inPort, outPort);
+				} else {
+					javaClient.setAddressAndPorts(serverAddress, inPort, outPort);
+				}
+			
 
 			fullAddressSupplied = true; // THE BEFORE MENTIONED IF STATEMENT SHOULD BE TRUE BEFORE THIS IS APPLIED
 		}
