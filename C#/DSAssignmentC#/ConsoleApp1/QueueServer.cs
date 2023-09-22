@@ -37,6 +37,8 @@ namespace QueueServerNameSpace{
             addToListThread.Start();
             Thread countdownThread = new Thread(countdown);
             countdownThread.Start();
+            Thread addToSupervisorListThread = new Thread(addToSupervisorList);
+            addToSupervisorListThread.Start();
 
             using (var pub = new PublisherSocket())
             {
@@ -86,7 +88,7 @@ namespace QueueServerNameSpace{
                 server.Bind("tcp://*:5556");
                 while (true)
                 {
-                    Thread removeFromListThread = new Thread(removeFromList);
+                    Thread removeFromListThread = new Thread(removeFromList);  // IS THIS STILL NEEDED?!
                     string msg = server.ReceiveFrameString();
                     //Console.WriteLine("From Client: {0}", msg);
                     //server.SendFrame("{}");
@@ -120,11 +122,75 @@ namespace QueueServerNameSpace{
                            // Console.WriteLine(studentName + " " +heartbeatDic[studentName]);
                             server.SendFrame("{}");
                         }
-
                     }
                     else
                     {
                         server.SendFrame("{}");
+                    }
+                }
+            }
+        }
+
+        public static void addToSupervisorList(){
+            
+            using (var server = new ResponseSocket())
+            {
+                server.Bind("tcp://*:5557");
+                while (true)
+                {
+                    // recives a Json as bellow :: CAN BE CHANGED
+                    // {
+                    //     "enterSupervisorQueue": true,
+                    //     "name": "<name>",
+                    //     "status": "<status>", 
+                    //     "clientId": "<unique id string>"
+                    // }
+                    
+                    string supervisorRequest = server.ReceiveFrameString();
+                    //Console.WriteLine("From Client: {0}", msg);
+                    //server.SendFrame("{}");
+                    
+                    dynamic jsonObj = JsonConvert.DeserializeObject(supervisorRequest);
+                    string supervisorName = jsonObj.name;
+                    string isAQueueRequest = jsonObj.enterSupervisorQueue; // DONT KNOW IF THIS IS GOING TO BE USED 
+                    string status = jsonObj.status;
+                    string id = jsonObj.clientId;   // DONT KNOW IF THIS IS GOING TO BE USED 
+                   
+                    if (!(supervisorQueue.ContainsKey(supervisorName)) /*&& (supervisorQueue.ContainsKey(isAQueueRequest)*)*/)
+                    {
+                        lock (supervisorQueue)
+                        {
+                            lock (heartbeatDic)
+                            {
+                                supervisor = new Supervisor(supervisorName, status);
+                                supervisorQueue.Add(supervisorName, supervisor);
+                                heartbeatDic.Add(supervisorName, 4);
+
+                                server.SendFrame("{\r\n" + 
+                                        "          \"name\": \""+supervisorName+"\",\r\n" + 
+                                        "          \"status\": \""+status+"\", \r\n" + 
+                                        "          }");
+                            }
+                        }
+                    }
+                    // else if (supervisorQueue.ContainsKey(supervisorName))
+                    // {
+                    //     lock (heartbeatDic)
+                    //     {
+                    //         heartbeatDic[supervisorName] = 4;
+                    //         //removeFromList(1);
+                    //         //removeFromList(4);
+                    //        // Console.WriteLine(studentName + " " +heartbeatDic[studentName]);
+                    //         server.SendFrame("{}");
+                    //     }
+                    // }
+                    // else
+                    // {
+                    //     server.SendFrame("{}");
+                    // }
+                    foreach (KeyValuePair<string, Supervisor> kvp in supervisorQueue)
+                    {
+                        Console.WriteLine(kvp.Key);
                     }
                 }
             }
@@ -149,8 +215,8 @@ namespace QueueServerNameSpace{
                             var itemsToRemove = queueList.Where(f => f.Value == removedStudent).ToArray();
                             foreach (var item in itemsToRemove)
                                 queueList.Remove(item.Key);
-                            heartbeatDic.Remove((string)removedStudent);
-                            // queueList.Remove(pa.Key);
+                                heartbeatDic.Remove((string)removedStudent);
+                                // queueList.Remove(pa.Key);
                                     
                             }
                         }

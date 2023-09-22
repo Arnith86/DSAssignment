@@ -27,13 +27,19 @@ public class SupervisorJavaClient extends JavaClient  {
 
 			ZMQ.Socket socket = context.createSocket(SocketType.REQ);			
 			try {
-					socket.connect(/* "tcp://ds.iit.his.se:5556" */  /* "tcp://"+address+":"+outPort*/ "tcp://localhost:5557");
+					socket.connect(/* "tcp://ds.iit.his.se:5557" */  /* "tcp://"+address+":"+outPort*/ "tcp://localhost:5557");
 				} catch (Exception e) {
 					System.out.println(e);
 				} 
 				
-			String enterSupervisorQueue = "{\"enterSupervisorQueue\": true, \"name\": \""+user+"\", \"clientId\": \"JP\"}";
-
+			String enterSupervisorQueue = " {\r\n" + 
+			        "                        \"enterSupervisorQueue\": true,\r\n" + 
+			        "                        \"name\": \""+user+"\",\r\n" + 
+			        "                        \"status\": \"<status>\", \r\n" + 
+			        "                        \"clientId\": \"<unique id string>\"\r\n" + 
+			        "                       }";
+            //"{\"enterSupervisorQueue\": true, \"name\": \""+user+"\", \"clientId\": \"JP\"}";
+                
 			socket.send(enterSupervisorQueue.getBytes(ZMQ.CHARSET),0);
 
 			byte[] reply = socket.recv(0);
@@ -41,9 +47,9 @@ public class SupervisorJavaClient extends JavaClient  {
 			System.out.println("this was recived: " + new String(reply, ZMQ.CHARSET));  // this should not be written out when application is finished only receive the reply
 
 			// IN TESTING
-			JavaClientHeartbeatTread heartbeat = new JavaClientHeartbeatTread(user, address, outPort);
-			Thread heartbeatThread = new Thread(heartbeat);
-			heartbeatThread.start();
+			// JavaClientHeartbeatTread heartbeat = new JavaClientHeartbeatTread(user, address, outPort);
+			// Thread heartbeatThread = new Thread(heartbeat);
+			// heartbeatThread.start();
 			// IN TESTING
 			// THIS MUST BE TERMINATED WHEN supervisor removes student from list
 			//context.destroy();

@@ -34,8 +34,8 @@ public class JavaClientGui implements ActionListener{
 
 	private Boolean fullAddressSupplied;
 
-	private JavaClient javaClient;// = new JavaClient(this);
-	private SupervisorJavaClient supervisorJavaClient; // = new SupervisorJavaClient(this);
+	private JavaClient javaClient;
+	private SupervisorJavaClient supervisorJavaClient; 
 	
 	private JLabel instructionText; 
 	private JLabel availableSupervisors;   

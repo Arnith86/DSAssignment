@@ -59,8 +59,8 @@ public class JavaClient {
 			int activeThreadCount = executor.getActiveCount();
 			if(activeThreadCount > 0){
 				queueUpdater.shutdown();
-				studentList.clear();
-				supervisorList.clear();
+				// studentList.clear();
+				// supervisorList.clear();
 				System.out.println("not shutdown: active: "+activeThreadCount);
 			}
 		}	
