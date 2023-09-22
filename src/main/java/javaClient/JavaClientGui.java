@@ -12,15 +12,22 @@ import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.json.JSONObject;
+
 public class JavaClientGui implements ActionListener{
 	// used for test on  the GUI, should be removed when the implementation is finished
 	
-	private String user; 
+
+	protected String kindOfClient;
+	private String supervisorString = "supervisor";
+	private String supervisorStatusInputArray[] = {"", "pending", "available","occupied"};
+	private String user=""; 
 	private String serverAddress;
 	private int inPort; 
 	private int outPort; 
@@ -28,6 +35,7 @@ public class JavaClientGui implements ActionListener{
 	private Boolean fullAddressSupplied;
 
 	private JavaClient javaClient = new JavaClient(this);
+	private SupervisorJavaClient supervisorJavaClient = new SupervisorJavaClient(this);
 	
 	private JLabel instructionText; 
 	private JLabel availableSupervisors;   
@@ -49,11 +57,21 @@ public class JavaClientGui implements ActionListener{
 	private JTextField portOutInput;
 	private JButton connectButton; 
 
+
+ 	JPanel supervisorInputPanel;
+	
+	JTextField messageInputField;
+	JButton nextStudentButton;
+	JComboBox<String> supervisorStatusInput;
+
+
+
 	private JPanel textInputPanel; 
 	private JTextField nameInput; 
 	private JButton sendButton;
 	
-	private JPanel supervisorsPanel;    
+	private JPanel supervisorsPanel;
+	private JLabel supervisorMessageLable = new JLabel();    
 	
 	private JPanel centerPanel;
 	
@@ -61,12 +79,16 @@ public class JavaClientGui implements ActionListener{
 	private JPanel newQueueEntry; 
 	
 	
-	public JavaClientGui () {
+	public JavaClientGui (String kindOfClient) {
 
-		fullAddressSupplied = false; 
-
+		fullAddressSupplied = false; // ARE WE USING THIS VARIABLE?
+		this.kindOfClient = kindOfClient;
 		
-		applicationFrame = new JFrame("Queue");
+		if(kindOfClient.equals(supervisorString)){
+			applicationFrame = new JFrame("Supervisor");	
+		} else {
+			applicationFrame = new JFrame("Queue");
+		}
 		
 		
 		// TOP PANEL  
@@ -113,10 +135,24 @@ public class JavaClientGui implements ActionListener{
 		textInputPanel.add(nameInput);
 		textInputPanel.add(sendButton);
 		
+		//supervisor specific panel
+		if(kindOfClient.equals(supervisorString)){
+			supervisorInputPanel = new JPanel();
+			
+			supervisorStatusInput = new JComboBox<>(supervisorStatusInputArray);		
+			nextStudentButton = new JButton("Next Student");
+			messageInputField = new JTextField("where should the students go?");
+			supervisorInputPanel.add(supervisorStatusInput);
+			supervisorInputPanel.add(messageInputField);
+			supervisorInputPanel.add(nextStudentButton);
+			
+		}
+		
 		inputPanel.add(addressPanel);
 		//inputPanel.add(instructionText);
 		inputPanel.add(textInputPanel);
-		
+		if(kindOfClient.equals(supervisorString)){inputPanel.add(supervisorInputPanel);}
+
 		// CENTER PANEL - top part  
 		// contains current supervisors and there messages 
 		supervisorsPanel = new JPanel();
@@ -146,10 +182,22 @@ public class JavaClientGui implements ActionListener{
 		applicationFrame.setVisible(true);
 		applicationFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
+		addressInput.addActionListener(this);
 		sendButton.addActionListener(this);
+		nameInput.addActionListener(this);
 		connectButton.addActionListener(this);
+		if(kindOfClient.equals(supervisorString)){
+			nextStudentButton.addActionListener(this);
+			supervisorStatusInput.addActionListener(this);
+			messageInputField.addActionListener(this);
+		}
 	}
 	
+	// public void setKindOfClient(String kindOfClient){
+	// 	this.kindOfClient = kindOfClient; 
+	// }
+
+
 	public void setStudentQueue(LinkedList<Students> studentList){
 		
 		queuePanel.removeAll();
@@ -185,7 +233,7 @@ public class JavaClientGui implements ActionListener{
 	public void setCurrentSupervisors(LinkedList<Supervisors> superervisorList){
 		
 		supervisorsPanel.removeAll();
-
+		supervisorMessageLable.setText("");;
 		if(superervisorList.size() == 0){
 			
 			availableSupervisors = new JLabel("There are no supervisors:");
@@ -200,11 +248,16 @@ public class JavaClientGui implements ActionListener{
 				} else {
 					availableSupervisors = new JLabel(superervisors.getSupervisorName()+": Helping: "+superervisors.getStudentName());
 				}
+				
+				if((superervisors.getSupervisorMessage() != null )){
+					supervisorMessageLable.setText(superervisors.getSupervisorMessage()); //= new JLabel(superervisors.getSupervisorMessage());
+				}	
+				//supervisorsPanel.add(supervisorMessageLable);
 				supervisorsPanel.add(availableSupervisors);
+				
 			});
-		}
-			
-
+		}	
+		centerPanel.add(supervisorMessageLable);
 		centerPanel.add(supervisorsPanel);
 		 // applicationFrame.revalidate(); 
 		 // applicationFrame.repaint();
@@ -215,7 +268,7 @@ public class JavaClientGui implements ActionListener{
 	public void actionPerformed(ActionEvent e) {
 		
 		// registers supplied name, and initiates placement in queue
-		if (e.getSource().equals(sendButton)) {
+		if ((e.getSource().equals(sendButton)) || (e.getSource().equals(nameInput))) {
 			
 			if(fullAddressSupplied == true){
 				this.user = nameInput.getText();
@@ -223,12 +276,18 @@ public class JavaClientGui implements ActionListener{
 				// String textNameInput = nameInput.getText();
 				// this.user = textNameInput;
 				javaClient.setUser(user);
+				if(kindOfClient.equals(supervisorString)){
+					supervisorJavaClient.placeInQueue();
+				} else {
+					javaClient.placeInQueue();
+				}
+				
 			}
 		
 		}
 
 		// regesters the values for server address and selected ports
-		if (e.getSource().equals(connectButton)) {
+		if ((e.getSource().equals(connectButton)) || (e.getSource().equals(addressInput))) {
 			
 			// THESE INPUTS NEEDS TO BE FAULT TOLARENT !	
 			// IT SHOULD HAVE AN WORKING IF STATEMENT THAT CHECKS THAT ALL INPUTS WERE RECIVED CORRECTLY 
@@ -249,6 +308,29 @@ public class JavaClientGui implements ActionListener{
 			javaClient.setAddressAndPorts(serverAddress, inPort, outPort);
 
 			fullAddressSupplied = true; // THE BEFORE MENTIONED IF STATEMENT SHOULD BE TRUE BEFORE THIS IS APPLIED
+		}
+
+		if(e.getSource().equals(nextStudentButton)){
+			// FILL OUT WITH FUNCTIONALITY 
+			System.out.println("next button");
+		}
+		
+		if(e.getSource().equals(supervisorStatusInput)){
+			// FILL OUT WITH FUNCTIONALITY 
+			if(!user.isBlank()){
+				System.out.println(supervisorStatusInput.getSelectedItem());
+			}
+			
+		}
+
+		if(e.getSource().equals(messageInputField)){
+			// FILL OUT WITH FUNCTIONALITY 
+
+			System.out.println(messageInputField.getText());
+			if(!user.isBlank()){
+				System.out.println(supervisorStatusInput.getSelectedItem());
+			}
+			
 		}
 		
 	}

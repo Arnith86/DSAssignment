@@ -15,7 +15,8 @@ public class Supervisors {
 
 		this.name = name;
 		this.status = status;
-		studentName = null; 
+		studentName = null;
+		message = null;  
 	}
 	
 	public void setSupervising(JSONObject client) {
@@ -46,5 +47,9 @@ public class Supervisors {
 
 	public int getTicket(){
 		return studentTickit;
+	}
+
+	public String getSupervisorMessage(){
+		return message; 
 	}
 }

@@ -38,10 +38,10 @@ namespace QueueServerNameSpace{
                 Thread countdownThread = new Thread(countdown);
                 countdownThread.Start();
             using (var pub = new PublisherSocket())
+            {
+                pub.Bind("tcp://*:5555");
+                while (true)
                 {
-                    pub.Bind("tcp://*:5555");
-                    while (true)
-                    {
 
                     lock (queueList)
                     {
@@ -54,16 +54,34 @@ namespace QueueServerNameSpace{
                             return "[{" + string.Join("},{", x) + "}]";
                         }
                         string js2 = MyDictionaryToJson(queueList);
-                        pub.SendMoreFrame("queue").SendFrame(js2);// Message
-                        pub.SendMoreFrame("supervisors").SendFrame(sendSupervisorList());// Message
-                        //pub.SendMoreFrame("JP").SendFrame(sendSupervisorMessage());// Message // DONT FORGET THAT THIS SHOULD BE SENT FOR EACH SUPERVISOR!!!       
-                                                                  //Console.WriteLine("lmao");
-                    }
-                    }
 
-                }  
+                        // Publishes the student queue
+                        pub.SendMoreFrame("queue").SendFrame(js2);
+                        // Publishes the supervisor queue
+                        pub.SendMoreFrame("supervisors").SendFrame(sendSupervisorList());
+                        // Publishes a message from the supervisor to the currently supervised student
+                        foreach (KeyValuePair<string, Supervisor> kvp in supervisorQueue)
+                        {
+                            string clientName = null;
+                            string supervisorMessage = null; 
+                            string supervisorName = null; 
+
+                            if (kvp.Value.getClientName() != undefined)
+                            {
+                                supervisorName = kvp.Key; 
+                                clientName = kvp.Value.getClientName();
+                                supervisorMessage = kvp.Value.getMessage();
+                                pub.SendMoreFrame(clientName).SendFrame(sendSupervisorMessage(supervisorMessage, supervisorName));// Message // DONT FORGET THAT THIS SHOULD BE SENT FOR EACH SUPERVISOR!!! 
+                            }
+                             //sypervisorQueueJArray.Add(supervisorObject);
+                        }
             
-            
+                       // pub.SendMoreFrame("JP").SendFrame(sendSupervisorMessage());// Message // DONT FORGET THAT THIS SHOULD BE SENT FOR EACH SUPERVISOR!!!       
+                                                                
+                    }
+                }
+
+            }  
         }
 
         public static void addToList()
@@ -160,33 +178,29 @@ namespace QueueServerNameSpace{
                     
         }
 
-        public static string sendSupervisorMessage(){
-            // /// everything within these comments are to be removed when the supervisor client can send data instead
-            // Supervisor supervisor;
-            // IDictionary<string, Supervisor> supervisorQueue = new Dictionary<string, Supervisor>();
-            
-            // supervisor = new Supervisor("Simon", "Available");
-            // supervisor.setSupervising();
-            // supervisor.setSupervisorMessage("This is a serius message with supervising instructions");
-            // supervisorQueue.Add(supervisor.getName(), supervisor);
-            // supervisor = new Supervisor("Erik", "Available");
-            // supervisorQueue.Add(supervisor.getName(), supervisor);
-            // /////////////////////////////////////////////////////////////////////////////////////////////////////////
+        public static string sendSupervisorMessage(string message, string supervisorName){
             
             // builds a JSON string out of the list of supervisors, as such  
             //      {
             //          "supervisor":"<name of supervisor>",
             //          "message":"<message from supervisor>"
             //      }
-            JArray sypervisorQueueJArray = new JArray();
+            
+            
+            
+            //JArray sypervisorQueueJArray = new JArray();
             JObject supervisorObject = new JObject(); 
 
             foreach (KeyValuePair<string, Supervisor> kvp in supervisorQueue)
             {
-                supervisorObject = new JObject(
-                    new JProperty("name", new JValue(kvp.Key)),
-                    new JProperty("message", new JValue(kvp.Value.getMessage()))
-                );
+                if (kvp.Value.getName() == supervisorName)
+                {
+                    supervisorObject = new JObject(
+                        new JProperty("name", new JValue(supervisorName)),
+                        new JProperty("message", new JValue(message))
+                    );        
+                }
+                
                 //sypervisorQueueJArray.Add(supervisorObject);
             }
 
@@ -197,19 +211,6 @@ namespace QueueServerNameSpace{
 
         public static string sendSupervisorList()
         {
-            /// everything within these comments are to be removed when the supervisor client can send data instead
-            // Supervisor supervisor;
-            // IDictionary<string, Supervisor> supervisorQueue = new Dictionary<string, Supervisor>();
-            
-            // supervisor = new Supervisor("Simon", "Available");
-            // supervisor.setSupervising();
-            // supervisor.setSupervisorMessage("This is a serius message with supervising instructions");
-            // supervisorQueue.Add(supervisor.getName(), supervisor);
-            // supervisor = new Supervisor("Erik", "Available");
-            // supervisorQueue.Add(supervisor.getName(), supervisor);
-            // /////////////////////////////////////////////////////////////////////////////////////////////////////////
-            
-
             // builds a JSON string out of the list of supervisors, as such 
             //  [ 
             //    {

@@ -40,6 +40,9 @@ public class JavaClient {
 
 	public void setUser(String user) {
 		this.user=user;
+	}
+
+	public void placeInQueue(){
 		enterQueue(user,serverAddress, outPortNummber);
 	}
 
@@ -49,15 +52,17 @@ public class JavaClient {
 		inPortNummber = inPort;
 		outPortNummber = outPort;
 
-		
+		// if any existing threads are active this will shut them down, and clean the current lists
 		if(!queueUpdater.isShutdown()){
 		
 			ThreadPoolExecutor executor = (ThreadPoolExecutor) queueUpdater;
 			int activeThreadCount = executor.getActiveCount();
 			if(activeThreadCount > 0){
 				queueUpdater.shutdown();
+				studentList.clear();
+				supervisorList.clear();
+				System.out.println("not shutdown: active: "+activeThreadCount);
 			}
-			System.out.println("not shutdown: active: "+activeThreadCount);
 		}	
 		
 		queueUpdater = Executors.newScheduledThreadPool(1);
@@ -82,7 +87,7 @@ public class JavaClient {
 				
 				try {
 					
-					subscriber.connect( /*"tcp://ds.iit.his.se:5555" */ "tcp://"+address+":"+inPort/*"tcp://localhost:5555" */ );
+					subscriber.connect( /*"tcp://	:5555" */ "tcp://"+address+":"+inPort/*"tcp://localhost:5555" */ );
 				} catch (Exception e) {
 					System.out.println(e);
 				} 
@@ -102,7 +107,8 @@ public class JavaClient {
 				JSONArray jsonMsg = new JSONArray(new String(subscriber.recv(), ZMQ.CHARSET));
 				//System.out.println("after jsonmsg");
 				//System.out.println(jsonMsg);
-
+				
+				JSONObject supervisorMsgObject = new JSONObject(); // will be used when checking for supervisor messages
 				// extracts the String value name from json objects housed in the jsonarray
 				for (int i = 0; i < jsonMsg.length(); i++) {
 
@@ -141,24 +147,33 @@ public class JavaClient {
 					//System.out.println(supervisorList.toString());
 					supervisorList.add(supervisorsObject);
 
-		// 			// checks if there is a message for the user
-		// 			// STILL IN EARLY TESTING !!!!!!!!!!!!!!!!
-		// 			if(clientObject.getString("name").equals(user)) {
-		// 			System.out.println("SHLIBDIB");
-		// 			System.out.println("tralalalaa");
-		// 			ZMQ.Socket supervisorMessage = context.createSocket(SocketType.SUB);
-		// 			supervisorMessage.connect(/*"tcp://ds.iit.his.se:5555"*/"tcp://"+address+":"+inPort);
-		// 			supervisorMessage.subscribe(user);
+					// checks if there is a message for the user
+					// STILL IN EARLY TESTING !!!!!!!!!!!!!!!!
+					// if(clientObject)){
 
-		// //				{
-		// //				    "supervisor":"<name of supervisor>",
-		// //				    "message":"<message from supervisor>"
-		// //				}
-		// 				String newTopic =  new String(supervisorMessage.recv(), ZMQ.CHARSET);	
-		// 				System.out.println("topic: "+ newTopic);
-		// 				JSONObject supervisorMsgObject = new JSONObject(new String(supervisorMessage.recv(), ZMQ.CHARSET));
-		// 				System.out.println("supervisor message: "+supervisorMsgObject.toString()); // TESTITEST
-		// 			}
+					// }
+					if((clientObject != null) && (clientObject.getString("name").equals(user))) {
+					
+						ZMQ.Socket supervisorMessage = context.createSocket(SocketType.SUB);
+						supervisorMessage.connect(/*"tcp:// :5555"*/"tcp://"+address+":"+inPort);
+						supervisorMessage.subscribe(user);
+
+						String newTopic =  new String(supervisorMessage.recv(), ZMQ.CHARSET);	
+						// System.out.println("topic: "+ newTopic);
+						supervisorMsgObject = new JSONObject(new String(supervisorMessage.recv(), ZMQ.CHARSET));
+						
+						// makes a hashmap out of the JSONobject
+						// THIS METHOD SHOULD BE A SINGLE METHOD
+						HashMap<String, Object> map2 = new HashMap<>();
+						Iterator<String> iter2 = supervisorMsgObject.keys();
+						while(iter2.hasNext()) {
+							String key = iter2.next();
+							map2.put(key, supervisorMsgObject.get(key));
+						}
+						
+						supervisorsObject.setSupervisorMessage((String) map2.get("message"));
+						//System.out.println("supervisor message: "+supervisorMsgObject.toString()); // TESTITEST
+					}
 				}
 		
 				gui.setCurrentSupervisors(supervisorList);  // this should be moved to the end of the method when it is finisehed
@@ -233,8 +248,7 @@ public class JavaClient {
 
 		try(ZContext context = new ZContext()){
 
-			ZMQ.Socket socket = context.createSocket(SocketType.REQ);
-			
+			ZMQ.Socket socket = context.createSocket(SocketType.REQ);			
 			try {
 					socket.connect(/* "tcp://ds.iit.his.se:5556" */  "tcp://"+address+":"+outPort /*"tcp://localhost:5556" */ );
 				} catch (Exception e) {
@@ -262,16 +276,6 @@ public class JavaClient {
 
 
 
-	public static void main(String[] args) {
 
-		JavaClientGui gui = new JavaClientGui();
-
-		JavaClient javaClient = new JavaClient(gui);
-		ScheduledExecutorService queueUpdater;
-		// queueUpdater = Executors.newScheduledThreadPool(1);
-		// // queueUpdater.scheduleWithFixedDelay(() -> javaClient.getCurrentQueue(), 0 , 500 , TimeUnit.MILLISECONDS);
-		// queueUpdater.scheduleWithFixedDelay(() -> javaClient.getCurrentSupervisors(), 0 , 500 , TimeUnit.MILLISECONDS);
-
-	}
 
 }
