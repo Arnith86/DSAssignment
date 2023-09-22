@@ -33,10 +33,11 @@ namespace QueueServerNameSpace{
             }
             Console.WriteLine("-----------------------------------");
            
-                Thread addToListThread = new Thread(new ThreadStart(addToList));
-                addToListThread.Start();
-                Thread countdownThread = new Thread(countdown);
-                countdownThread.Start();
+            Thread addToListThread = new Thread(new ThreadStart(addToList));
+            addToListThread.Start();
+            Thread countdownThread = new Thread(countdown);
+            countdownThread.Start();
+
             using (var pub = new PublisherSocket())
             {
                 pub.Bind("tcp://*:5555");
@@ -47,7 +48,6 @@ namespace QueueServerNameSpace{
                     {
                         static string MyDictionaryToJson(IDictionary<int, string> dict)
                         {
-
                             //Thread.Sleep(3);
                             var x = dict.Select(d =>
                                     string.Format("\"ticket\": {0}, \"name\": \"{1}\"", d.Key, string.Join(",", d.Value)));
@@ -71,16 +71,11 @@ namespace QueueServerNameSpace{
                                 supervisorName = kvp.Key; 
                                 clientName = kvp.Value.getClientName();
                                 supervisorMessage = kvp.Value.getMessage();
-                                pub.SendMoreFrame(clientName).SendFrame(sendSupervisorMessage(supervisorMessage, supervisorName));// Message // DONT FORGET THAT THIS SHOULD BE SENT FOR EACH SUPERVISOR!!! 
+                                pub.SendMoreFrame(clientName).SendFrame(sendSupervisorMessage(supervisorMessage, supervisorName));
                             }
-                             //sypervisorQueueJArray.Add(supervisorObject);
-                        }
-            
-                       // pub.SendMoreFrame("JP").SendFrame(sendSupervisorMessage());// Message // DONT FORGET THAT THIS SHOULD BE SENT FOR EACH SUPERVISOR!!!       
-                                                                
+                        }                                                                
                     }
                 }
-
             }  
         }
 
@@ -95,7 +90,6 @@ namespace QueueServerNameSpace{
                     string msg = server.ReceiveFrameString();
                     //Console.WriteLine("From Client: {0}", msg);
                     //server.SendFrame("{}");
-
                     
                     dynamic jsonObj = JsonConvert.DeserializeObject(msg);
                     string studentName = jsonObj.name;
@@ -132,10 +126,10 @@ namespace QueueServerNameSpace{
                     {
                         server.SendFrame("{}");
                     }
-
                 }
             }
         }
+
         public static void countdown()
         {
             Thread removeFromListThread = new Thread(removeFromList);
@@ -160,7 +154,6 @@ namespace QueueServerNameSpace{
                                     
                             }
                         }
-
                     }
                     else
                     {
@@ -172,6 +165,7 @@ namespace QueueServerNameSpace{
                 Thread.Sleep(1000);
             }
         }
+
         public static void removeFromList(object removedStudent)
         {
 
@@ -186,9 +180,6 @@ namespace QueueServerNameSpace{
             //          "message":"<message from supervisor>"
             //      }
             
-            
-            
-            //JArray sypervisorQueueJArray = new JArray();
             JObject supervisorObject = new JObject(); 
 
             foreach (KeyValuePair<string, Supervisor> kvp in supervisorQueue)
@@ -200,13 +191,9 @@ namespace QueueServerNameSpace{
                         new JProperty("message", new JValue(message))
                     );        
                 }
-                
-                //sypervisorQueueJArray.Add(supervisorObject);
             }
 
-
-
-            return supervisorObject.ToString(); // give a proper variable when its ready 
+            return supervisorObject.ToString(); 
         }
 
         public static string sendSupervisorList()
