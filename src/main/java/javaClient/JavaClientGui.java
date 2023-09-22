@@ -192,10 +192,6 @@ public class JavaClientGui implements ActionListener{
 			messageInputField.addActionListener(this);
 		}
 	}
-	
-	// public void setKindOfClient(String kindOfClient){
-	// 	this.kindOfClient = kindOfClient; 
-	// }
 
 
 	public void setStudentQueue(LinkedList<Students> studentList){
@@ -203,7 +199,6 @@ public class JavaClientGui implements ActionListener{
 		queuePanel.removeAll();
 		
 		studentList.forEach(students -> {
-			//System.out.println(students.getName()+" "+ students.getTicket());   // HERE FOR TESTING REASONS to be removed before finish
 			newQueueEntry = new JPanel(); 
 			JLabel tempLabel = new JLabel(students.getName());
 			
@@ -250,9 +245,8 @@ public class JavaClientGui implements ActionListener{
 				}
 				
 				if((superervisors.getSupervisorMessage() != null )){
-					supervisorMessageLable.setText(superervisors.getSupervisorMessage()); //= new JLabel(superervisors.getSupervisorMessage());
+					supervisorMessageLable.setText(superervisors.getSupervisorMessage()); 
 				}	
-				//supervisorsPanel.add(supervisorMessageLable);
 				supervisorsPanel.add(availableSupervisors);
 				
 			});
@@ -263,7 +257,7 @@ public class JavaClientGui implements ActionListener{
 		 // applicationFrame.repaint();
 	}
 
-	// 
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
