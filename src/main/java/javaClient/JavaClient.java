@@ -21,6 +21,7 @@ public class JavaClient {
 	protected String serverAddress;
 	protected int inPortNummber;
 	protected int outPortNummber;
+	protected String currentSupervisorStatus;
 
 	private Boolean fullAddressSupplied;
 

@@ -26,7 +26,8 @@ public class JavaClientGui implements ActionListener{
 
 	protected String kindOfClient;
 	private String supervisorString = "supervisor";
-	private String supervisorStatusInputArray[] = {"", "pending", "available","occupied"};
+	private String supervisorStatusInputArray[] = {"pending", "available","occupied"};
+	protected String currentSupervisorStatus="pending";  
 	private static String user=""; 
 	private static String serverAddress;
 	private static int inPort; 
@@ -164,9 +165,6 @@ public class JavaClientGui implements ActionListener{
 		// contains current supervisors and there messages 
 		supervisorsPanel = new JPanel();
 		supervisorsPanel.setLayout(new BoxLayout(supervisorsPanel, BoxLayout.Y_AXIS)); 
-		supervisorsPanel.setBorder(BorderFactory.createLineBorder(Color.black));
-		//availableSupervisors = new JLabel("supervisors");
-		//supervisorsPanel.add(availableSupervisors);
 		
 		
 		// CENTER PANEL - bottom part
@@ -178,11 +176,11 @@ public class JavaClientGui implements ActionListener{
 		// CENTER PANEL - Setup
 		centerPanel = new JPanel();
 		centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
+ 		centerPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 		//centerPanel.add(availableSupervisors);
 		
 		// Frame setup
 		applicationFrame.add(inputPanel, BorderLayout.NORTH);
-		//applicationFrame.add(supervisorsPanel, BorderLayout.CENTER);
 		applicationFrame.add(centerPanel, BorderLayout.CENTER);
 		// Some more configuration might be needed 
 		applicationFrame.setSize(400, 800);
@@ -245,10 +243,10 @@ public class JavaClientGui implements ActionListener{
 			
 			superervisorList.forEach(superervisors -> {
 			
-				if(superervisors.getStudentName().equals(null)){
-					availableSupervisors = new JLabel(superervisors.getSupervisorName()+": Status: "+superervisors.getStatus());
+				if(superervisors.getStudentName().equals("undefined")){
+					availableSupervisors = new JLabel(superervisors.getSupervisorName()+": "+superervisors.getStatus());
 				} else {
-					availableSupervisors = new JLabel(superervisors.getSupervisorName()+": Helping: "+superervisors.getStudentName());
+					availableSupervisors = new JLabel(superervisors.getSupervisorName()+": "+superervisors.getStatus()+ "  - "+"Helping: "+superervisors.getStudentName());
 				}
 				
 				if((superervisors.getSupervisorMessage() != null )){
@@ -278,7 +276,7 @@ public class JavaClientGui implements ActionListener{
 				// this.user = textNameInput;
 				
 				if(kindOfClient.equals(supervisorString)){
-					supervisorJavaClient.setUser(user);
+					supervisorJavaClient.setUser(user, currentSupervisorStatus);
 					supervisorJavaClient.placeInQueue();
 				} else {
 					javaClient.setUser(user);
@@ -314,7 +312,6 @@ public class JavaClientGui implements ActionListener{
 					javaClient.setAddressAndPorts(serverAddress, inPort, outPort);
 				}
 			
-
 			fullAddressSupplied = true; // THE BEFORE MENTIONED IF STATEMENT SHOULD BE TRUE BEFORE THIS IS APPLIED
 		}
 
@@ -333,10 +330,10 @@ public class JavaClientGui implements ActionListener{
 
 		if(e.getSource().equals(messageInputField)){
 			// FILL OUT WITH FUNCTIONALITY 
-
-			System.out.println(messageInputField.getText());
 			if(!user.isBlank()){
-				System.out.println(supervisorStatusInput.getSelectedItem());
+				supervisorJavaClient.regesterSupervisorMessage(messageInputField.getText());
+				//System.out.println(messageInputField.getText());
+				
 			}
 			
 		}

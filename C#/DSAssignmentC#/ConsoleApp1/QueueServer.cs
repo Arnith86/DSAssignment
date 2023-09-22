@@ -7,6 +7,7 @@ using NetMQ;
 using System.Drawing.Text;
 using System.Collections;
 using Newtonsoft.Json.Linq;
+using System.Collections.Concurrent;
 
 namespace QueueServerNameSpace{
     static partial class QueueServer{
@@ -16,7 +17,7 @@ namespace QueueServerNameSpace{
         static SortedDictionary<int, string> queueList = new SortedDictionary<int, string>();
         static Dictionary<string, int> heartbeatDic = new Dictionary<string, int>();
         static Supervisor supervisor;
-        static IDictionary<string, Supervisor> supervisorQueue = new Dictionary<string, Supervisor>();
+        static ConcurrentDictionary <string, Supervisor> supervisorQueue = new ConcurrentDictionary<string, Supervisor>();
         public static void sendList(IDictionary<string, Supervisor> supervisorQueue)
         {
             
@@ -131,8 +132,8 @@ namespace QueueServerNameSpace{
             }
         }
 
-        public static void addToSupervisorList(){
-            
+        public static void addToSupervisorList()
+        {  
             using (var server = new ResponseSocket())
             {
                 server.Bind("tcp://*:5557");
@@ -146,51 +147,103 @@ namespace QueueServerNameSpace{
                     //     "clientId": "<unique id string>"
                     // }
                     
-                    string supervisorRequest = server.ReceiveFrameString();
+                    string request = server.ReceiveFrameString();
                     //Console.WriteLine("From Client: {0}", msg);
                     //server.SendFrame("{}");
                     
-                    dynamic jsonObj = JsonConvert.DeserializeObject(supervisorRequest);
-                    string supervisorName = jsonObj.name;
-                    string isAQueueRequest = jsonObj.enterSupervisorQueue; // DONT KNOW IF THIS IS GOING TO BE USED 
-                    string status = jsonObj.status;
-                    string id = jsonObj.clientId;   // DONT KNOW IF THIS IS GOING TO BE USED 
-                   
-                    if (!(supervisorQueue.ContainsKey(supervisorName)) /*&& (supervisorQueue.ContainsKey(isAQueueRequest)*)*/)
-                    {
-                        lock (supervisorQueue)
-                        {
-                            lock (heartbeatDic)
-                            {
-                                supervisor = new Supervisor(supervisorName, status);
-                                supervisorQueue.Add(supervisorName, supervisor);
-                                heartbeatDic.Add(supervisorName, 4);
+                    dynamic jsonObj = JsonConvert.DeserializeObject(request);
 
-                                server.SendFrame("{\r\n" + 
-                                        "          \"name\": \""+supervisorName+"\",\r\n" + 
-                                        "          \"status\": \""+status+"\", \r\n" + 
-                                        "          }");
+                    // JObject jsonObject = jsonObj;
+
+                    // foreach (var property in jsonObject.Properties())
+                    // {
+                    //     string key = property.Name;
+                    //     JToken value = property.Value;
+
+                    //     // Key is the name of the property, and value is the corresponding value
+                    //     Console.WriteLine($"Key: {key}, Value: {value}");
+                    // }
+                    
+                                       
+                    if(jsonObj !=null && jsonObj.ContainsKey("enterSupervisorQueue"))
+                    {
+                        string supervisorName = jsonObj.name;
+                        string isAQueueRequest = jsonObj.enterSupervisorQueue;  
+                        string status = jsonObj.status;
+                        string id = jsonObj.clientId;   // DONT KNOW IF THIS IS GOING TO BE USED 
+                        
+                        if (!supervisorQueue.ContainsKey(supervisorName) && isAQueueRequest.Equals("True"))
+                        {
+                            lock (supervisorQueue)
+                            {
+                                lock (heartbeatDic)
+                                {
+                                    supervisor = new Supervisor(supervisorName, status);
+                                    supervisorQueue[supervisorName] = supervisor;  
+                                    // supervisorQueue.Add(supervisorName, supervisor); 
+                                    heartbeatDic.Add(supervisorName, 4);
+
+                                    server.SendFrame("{\r\n" + 
+                                            "          \"name\": \""+supervisorName+"\",\r\n" + 
+                                            "          \"status\": \""+status+"\", \r\n" + 
+                                            "          }");
+                                }
+                            }
+                        } 
+                        else 
+                        {
+                            server.SendFrame("{}");
+                        }
+                        // else if (supervisorQueue.ContainsKey(supervisorName))
+                        // {
+                        //     lock (heartbeatDic)
+                        //     {
+                        //         heartbeatDic[supervisorName] = 4;
+                        //         //removeFromList(1);
+                        //         //removeFromList(4);
+                        //        // Console.WriteLine(studentName + " " +heartbeatDic[studentName]);
+                        //         server.SendFrame("{}");
+                        //     }
+                        // }
+                        // else
+                        // {
+                        //     server.SendFrame("{}");
+                        // }
+                    } 
+                    
+                    else if(jsonObj != null && jsonObj.ContainsKey("supervisor"))
+                    {
+                        string name = jsonObj.supervisor;
+                        string message = jsonObj.message;
+                        
+                        if(supervisorQueue.ContainsKey(name)){
+                           
+                            lock (supervisorQueue)
+                            {
+                                lock (heartbeatDic)
+                                {
+                                    supervisorQueue[name].setSupervisorMessage(message);                                        
+                                    server.SendFrame("{\r\n" + 
+                                            "          \"supervisor\": \""+name+"\",\r\n" + 
+                                            "          \"message\": \""+message+"\", \r\n" + 
+                                            "          }");
+                                }
                             }
                         }
+                        else
+                        {
+                            server.SendFrame("{}");
+                        }
                     }
-                    // else if (supervisorQueue.ContainsKey(supervisorName))
-                    // {
-                    //     lock (heartbeatDic)
-                    //     {
-                    //         heartbeatDic[supervisorName] = 4;
-                    //         //removeFromList(1);
-                    //         //removeFromList(4);
-                    //        // Console.WriteLine(studentName + " " +heartbeatDic[studentName]);
-                    //         server.SendFrame("{}");
-                    //     }
-                    // }
-                    // else
-                    // {
-                    //     server.SendFrame("{}");
-                    // }
+                    else
+                    {
+                        server.SendFrame("{}");
+                    }
+                    
+                    /// HERE FOR TESTING REASIONS 
                     foreach (KeyValuePair<string, Supervisor> kvp in supervisorQueue)
                     {
-                        Console.WriteLine(kvp.Key);
+                        Console.WriteLine("supervisor: "+kvp.Key+" message: "+kvp.Value.getMessage());
                     }
                 }
             }
@@ -312,9 +365,13 @@ namespace QueueServerNameSpace{
             supervisor = new Supervisor("Simon", "Available");
             supervisor.setSupervising();
             supervisor.setSupervisorMessage("This is a serius message with supervising instructions");
-            supervisorQueue.Add(supervisor.getName(), supervisor);
+            // supervisorQueue.Add(supervisor.getName(), supervisor);
+            // supervisor = new Supervisor("Erik", "Available");
+            // supervisorQueue.Add(supervisor.getName(), supervisor);
+            supervisorQueue[supervisor.getName()] = supervisor;
             supervisor = new Supervisor("Erik", "Available");
-            supervisorQueue.Add(supervisor.getName(), supervisor);
+            supervisorQueue[supervisor.getName()] = supervisor;
+            
             /////////////////////////////////////////////////////////////////////////////////////////////////////////
             sendList(supervisorQueue);
         }

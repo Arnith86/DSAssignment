@@ -12,13 +12,19 @@ public class SupervisorJavaClient extends JavaClient  {
         super(gui);
         
     }
-
-    @Override
+	
+	public void setUser(String user, String status) {
+		this.user=user;
+		currentSupervisorStatus = status; 
+	}
+    
+	@Override
     public void placeInQueue() {
         // TODO Auto-generated method stub
             System.out.println("placed in queue");
             enterSupervisorQueue(super.user, super.serverAddress, super.outPortNummber);
     }
+
     // places supplied user in the server queue
 	// TODO!!!!!   WE NEED TO CREATE A UID SOMEHOW!!!!!!!!!!!!!!!!!!!!!!
 	private void enterSupervisorQueue(String user, String address, int outPort) {
@@ -35,7 +41,7 @@ public class SupervisorJavaClient extends JavaClient  {
 			String enterSupervisorQueue = " {\r\n" + 
 			        "                        \"enterSupervisorQueue\": true,\r\n" + 
 			        "                        \"name\": \""+user+"\",\r\n" + 
-			        "                        \"status\": \"<status>\", \r\n" + 
+			        "                        \"status\": \""+currentSupervisorStatus+"\", \r\n" + 
 			        "                        \"clientId\": \"<unique id string>\"\r\n" + 
 			        "                       }";
             //"{\"enterSupervisorQueue\": true, \"name\": \""+user+"\", \"clientId\": \"JP\"}";
@@ -52,8 +58,34 @@ public class SupervisorJavaClient extends JavaClient  {
 			// heartbeatThread.start();
 			// IN TESTING
 			// THIS MUST BE TERMINATED WHEN supervisor removes student from list
-			//context.destroy();
+			socket.close();
+			context.close();
 		}
+	}
 
+	protected void regesterSupervisorMessage(String message){
+		try(ZContext context = new ZContext()){
+
+			ZMQ.Socket socket = context.createSocket(SocketType.REQ);			
+			try {
+					socket.connect(/* "tcp://ds.iit.his.se:5557" */  /* "tcp://"+address+":"+outPort*/ "tcp://localhost:5557");
+				} catch (Exception e) {
+					System.out.println(e);
+				} 
+				
+			String enterSupervisorQueue = 	"{\r\n" + //
+											"    \"supervisor\":\""+user+"\",\r\n" + //
+											"    \"message\":\""+message+"\"\r\n" + //
+											"} ";
+       
+			socket.send(enterSupervisorQueue.getBytes(ZMQ.CHARSET),0);
+
+			byte[] reply = socket.recv(0);
+
+			System.out.println("this was recived: " + new String(reply, ZMQ.CHARSET));  // this should not be written out when application is finished only receive the reply
+
+			socket.close();
+			context.close();
+		}
 	}
 }
