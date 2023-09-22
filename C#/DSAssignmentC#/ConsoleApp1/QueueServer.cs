@@ -211,7 +211,7 @@ namespace QueueServerNameSpace{
                         // }
                     } 
                     
-                    else if(jsonObj != null && jsonObj.ContainsKey("supervisor"))
+                    else if(jsonObj != null && jsonObj.ContainsKey("supervisor") && jsonObj.ContainsKey("message"))
                     {
                         string name = jsonObj.supervisor;
                         string message = jsonObj.message;
@@ -220,7 +220,7 @@ namespace QueueServerNameSpace{
                            
                             lock (supervisorQueue)
                             {
-                                lock (heartbeatDic)
+                                lock (heartbeatDic) // IS THIS LOOK NEEDED? 
                                 {
                                     supervisorQueue[name].setSupervisorMessage(message);                                        
                                     server.SendFrame("{\r\n" + 
@@ -235,8 +235,32 @@ namespace QueueServerNameSpace{
                             server.SendFrame("{}");
                         }
                     }
-                    else
-                    {
+                    else if (jsonObj != null && jsonObj.ContainsKey("statusChange")){
+                        
+                        string name = jsonObj.supervisor;
+                        string status = jsonObj.status;
+                        
+                        if(supervisorQueue.ContainsKey(name)){
+                           
+                            lock (supervisorQueue)
+                            {
+                                lock (heartbeatDic) // IS THIS LOOK NEEDED? 
+                                {
+                                    supervisorQueue[name].setStatus(status);                                        
+                                    server.SendFrame("{\r\n" + 
+                                            "          \"supervisor\": \""+name+"\",\r\n" + 
+                                            "          \"status\": \""+status+"\", \r\n" + 
+                                            "          }");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            server.SendFrame("{}");    
+                        }
+                    }
+                    else 
+                    {   // handles an unexpected json
                         server.SendFrame("{}");
                     }
                     

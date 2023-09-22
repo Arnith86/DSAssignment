@@ -1,3 +1,4 @@
+using System.Dynamic;
 using System.Net;
 using Newtonsoft.Json.Schema;
 
@@ -24,6 +25,10 @@ namespace QueueServerNameSpace
             clientName="JP";
             clientTicket=1;
         } 
+
+        public void setStatus(string status){
+            this.status = status;    
+        }
         public void setSupervisorMessage(string message){
             this.message = message;
         }

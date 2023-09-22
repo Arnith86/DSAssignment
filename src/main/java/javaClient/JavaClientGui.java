@@ -323,7 +323,9 @@ public class JavaClientGui implements ActionListener{
 		if(e.getSource().equals(supervisorStatusInput)){
 			// FILL OUT WITH FUNCTIONALITY 
 			if(!user.isBlank()){
-				System.out.println(supervisorStatusInput.getSelectedItem());
+
+				supervisorJavaClient.changeSupervisorStatus(supervisorStatusInput.getSelectedItem().toString());
+				//System.out.println(supervisorStatusInput.getSelectedItem().toString());
 			}
 			
 		}
@@ -331,7 +333,7 @@ public class JavaClientGui implements ActionListener{
 		if(e.getSource().equals(messageInputField)){
 			// FILL OUT WITH FUNCTIONALITY 
 			if(!user.isBlank()){
-				supervisorJavaClient.regesterSupervisorMessage(messageInputField.getText());
+				supervisorJavaClient.registerSupervisorMessage(messageInputField.getText());
 				//System.out.println(messageInputField.getText());
 				
 			}
