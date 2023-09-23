@@ -95,7 +95,7 @@ namespace QueueServerNameSpace{
                     dynamic jsonObj = JsonConvert.DeserializeObject(msg);
                     string studentName = jsonObj.name;
                     Console.WriteLine(jsonObj);
-                    if (!(queueList.ContainsValue(studentName)))
+                    if (!(queueList.ContainsValue(studentName)) && jsonObj != null && jsonObj.ContainsKey("enterQueue"))
                     {
                         lock (queueList)
                         {
