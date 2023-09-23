@@ -262,6 +262,21 @@ namespace QueueServerNameSpace{
                         if(supervisorQueue.ContainsKey(supervisor)){
                             Console.WriteLine("supervisor: "+supervisorQueue[supervisor].getName()+
                                               "student: "+supervisorQueue[supervisor].getClientName()  );
+
+                            lock(queueList){
+                                lock(supervisorQueue){
+
+                                    KeyValuePair<int,string> firstElement = queueList.First();
+                                    int studentTicket = firstElement.Key;
+                                    string studentName = firstElement.Value;
+                                    
+                                    supervisorQueue[supervisor].setSupervising(studentName, studentTicket);
+
+                                    queueList.Remove(firstElement.Key); 
+                                   
+                                }
+                            }
+
                             server.SendFrame("{\"supervisor\": \""+supervisor+"\", \"nextStudent\": true}");
                         }
                         else
@@ -391,7 +406,7 @@ namespace QueueServerNameSpace{
          public static void setupSupervisorQueueDic(){
             /// everything within these comments are to be removed when the supervisor client can send data instead
             supervisor = new Supervisor("Simon", "Available");
-            supervisor.setSupervising();
+            //supervisor.setSupervising();
             supervisor.setSupervisorMessage("This is a serius message with supervising instructions");
             // supervisorQueue.Add(supervisor.getName(), supervisor);
             // supervisor = new Supervisor("Erik", "Available");

@@ -21,9 +21,9 @@ namespace QueueServerNameSpace
         }
 
         // method is still being worked on, supposed to collect client information 
-        public void setSupervising(){
-            clientName="JP";
-            clientTicket=1;
+        public void setSupervising(string clientName, int clientTicket){
+            this.clientName = clientName;
+            this.clientTicket = clientTicket;
         } 
 
         public void setStatus(string status){
