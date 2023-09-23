@@ -256,13 +256,10 @@ namespace QueueServerNameSpace{
                     }
                     else if(jsonObj != null && jsonObj.ContainsKey("nextStudent"))
                     {
-                        Console.WriteLine("from NextStudent");
                         string supervisor = jsonObj.supervisor;
                         
                         if(supervisorQueue.ContainsKey(supervisor)){
-                            Console.WriteLine("supervisor: "+supervisorQueue[supervisor].getName()+
-                                              "student: "+supervisorQueue[supervisor].getClientName()  );
-
+                            
                             lock(queueList){
                                 lock(supervisorQueue){
 
@@ -271,9 +268,7 @@ namespace QueueServerNameSpace{
                                     string studentName = firstElement.Value;
                                     
                                     supervisorQueue[supervisor].setSupervising(studentName, studentTicket);
-
-                                    queueList.Remove(firstElement.Key); 
-                                   
+                                    queueList.Remove(firstElement.Key);               
                                 }
                             }
 
@@ -281,7 +276,7 @@ namespace QueueServerNameSpace{
                         }
                         else
                         {  
-                        server.SendFrame("{}");
+                            server.SendFrame("{}");
                         }
                     }
                     else 

@@ -47,6 +47,39 @@ public class JavaClient {
 		enterQueue(user,serverAddress, outPortNummber);
 	}
 
+	// performes the ZMQ subscriber connection for a specific topic, 
+	// returns json-string 
+	protected String subscribe(String topic){
+		
+		String jsonMsg;
+
+		try(ZContext context = new ZContext()){
+			ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
+
+			try {
+					subscriber.connect("tcp://"+serverAddress+":"+inPortNummber );
+				} catch (Exception e) {
+					System.out.println(e);
+				} 
+			
+			subscriber.subscribe(topic);
+
+			try {
+				String subscriberTopic =  new String(subscriber.recv(), ZMQ.CHARSET);	
+			 	//System.out.println("what topic:"+topic);	
+				} catch (Exception e) {	
+			 		System.out.println(e);
+			}
+
+			jsonMsg = new String(subscriber.recv(), ZMQ.CHARSET);
+			subscriber.close();
+			context.close();
+		}
+
+		return jsonMsg;
+	}
+
+
 	public void setAddressAndPorts(String address, int inPort, int outPort){
 		
 		serverAddress = address;
@@ -67,179 +100,114 @@ public class JavaClient {
 		}	
 		
 		queueUpdater = Executors.newScheduledThreadPool(1);
-		queueUpdater.scheduleWithFixedDelay(() -> getCurrentQueue(address, inPort), 0 , 500 , TimeUnit.MILLISECONDS);   //// DOOOOOONT FORGRET TO ACTIVATE AGAIN
-		queueUpdater.scheduleWithFixedDelay(() -> getCurrentSupervisors(address, inPort), 0 , 550 , TimeUnit.MILLISECONDS);
+		queueUpdater.scheduleWithFixedDelay(() -> getCurrentQueue(), 0 , 500 , TimeUnit.MILLISECONDS);  
+		queueUpdater.scheduleWithFixedDelay(() -> getCurrentSupervisors(), 0 , 550 , TimeUnit.MILLISECONDS);
 		// this.fullAddressSupplied = true;  THIS IS CURRENTLY NOT FUNCTIONING
 	}
 
 	// Will display available supervisors
 	// STILL IN TESTING !!!!!!!!!!!!!!!!
-	// Cannot test right now though... no supervisors present..
-	private Runnable getCurrentSupervisors(String address, int inPort ) {
+	private Runnable getCurrentSupervisors() {
 		//if (fullAddressSupplied == true){     // WE NEED TO STOP A CONNECTION FROM HAPPENING IF NO ADDRESS HAS BEEN GIVEN
 		// ^THIS IS CURRENTLY NOT FUNCTIONING
 
-			supervisorList = new LinkedList<Supervisors>();
+		supervisorList = new LinkedList<Supervisors>();
+		String msg =  subscribe("supervisors");
+		JSONArray jsonMsg = new JSONArray(msg);
+		JSONObject supervisorMsgObject = new JSONObject(); // will be used when checking for supervisor messages
+		
+		// extracts the String value name from json objects housed in the jsonarray
+		for (int i = 0; i < jsonMsg.length(); i++) {
 
-			try(ZContext context = new ZContext()){
+			// converts Json array elements into Json objects
+			JSONObject supervisor = new JSONObject(jsonMsg.get(i).toString());
+			HashMap<String, Object> map = new HashMap<>();
+			Iterator<String> iter = supervisor.keys();
 
-				// gets the list of Current Supervisors
-				ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
-				
-				try {
+			// makes a hashmap out of the JSONobject
+			// THIS METHOD SHOULD BE A SINGLE METHOD
+			while(iter.hasNext()) {
+				String key = iter.next();
+				map.put(key, supervisor.get(key));
+			}
+
+			String name = (String) map.get("name");
+			String status = (String) map.get("status");
+			Supervisors supervisorsObject = new Supervisors(name, status);
+
+			// Check if "client" is a JSONObject
+			JSONObject clientObject = supervisor.optJSONObject("client");
+			if (clientObject != null) {
+
+				// "client" is a JSONObject, handle object
+				JSONObject client = supervisor.getJSONObject("client");
+				supervisorsObject.setSupervising(client);
+			
+			} else {
+				//client is not a JSONObject or does not exist
+				String client = (String) map.get("client");
+				supervisorsObject.setSupervising();
+			}
+
+
+				//System.out.println(supervisorList.toString());
+				supervisorList.add(supervisorsObject);
+
+				// checks if there is a message for the user
+				if((clientObject != null) && (clientObject.getString("name").equals(user))) {
 					
-					subscriber.connect( /*"tcp://	:5555" */ "tcp://"+address+":"+inPort/*"tcp://localhost:5555" */ );
-				} catch (Exception e) {
-					System.out.println(e);
-				} 
-				// finally {
-				// 	subscriber.close();
-				// 	context.close();
-				// }
-				
-				subscriber.subscribe("supervisors");
-
-				String topic =  new String(subscriber.recv(), ZMQ.CHARSET);
-				//String msg =  new String(subscriber.recv(), ZMQ.CHARSET);
-				//System.out.println("we are here");
-				//System.out.println(topic); // for tests
-				//System.out.println(msg);	// for tests
-
-				JSONArray jsonMsg = new JSONArray(new String(subscriber.recv(), ZMQ.CHARSET));
-				//System.out.println("after jsonmsg");
-				//System.out.println(jsonMsg);
-				
-				JSONObject supervisorMsgObject = new JSONObject(); // will be used when checking for supervisor messages
-				// extracts the String value name from json objects housed in the jsonarray
-				for (int i = 0; i < jsonMsg.length(); i++) {
-
-					// converts Json array elements into Json objects
-					JSONObject supervisor = new JSONObject(jsonMsg.get(i).toString());
-					HashMap<String, Object> map = new HashMap<>();
-					Iterator<String> iter = supervisor.keys();
-
+					String msg2 = subscribe(user);
+					supervisorMsgObject = new JSONObject(msg2);
+					
 					// makes a hashmap out of the JSONobject
 					// THIS METHOD SHOULD BE A SINGLE METHOD
-					while(iter.hasNext()) {
-						String key = iter.next();
-						map.put(key, supervisor.get(key));
+					HashMap<String, Object> map2 = new HashMap<>();
+					Iterator<String> iter2 = supervisorMsgObject.keys();
+					while(iter2.hasNext()) {
+						String key = iter2.next();
+						map2.put(key, supervisorMsgObject.get(key));
 					}
-
-					String name = (String) map.get("name");
-					String status = (String) map.get("status");
-					Supervisors supervisorsObject = new Supervisors(name, status);
-
-					// Check if "client" is a JSONObject
-					JSONObject clientObject = supervisor.optJSONObject("client");
-					if (clientObject != null) {
-						// "client" is a JSONObject, handle object
-						JSONObject client = supervisor.getJSONObject("client");
-						supervisorsObject.setSupervising(client);
-						//System.out.println(supervisorsObject.getStudentName());
-						//System.out.println(supervisorsObject.getTicket());
-					} else {
-						//System.out.println("client is not a JSONObject or does not exist.");
-						String client = (String) map.get("client");
-						supervisorsObject.setSupervising();
-						//System.out.println(supervisorsObject.getStudentName());
-					}
-
-
-					//System.out.println(supervisorList.toString());
-					supervisorList.add(supervisorsObject);
-
-					// checks if there is a message for the user
-					// STILL IN EARLY TESTING !!!!!!!!!!!!!!!!
-					// if(clientObject)){
-
-					// }
-					if((clientObject != null) && (clientObject.getString("name").equals(user))) {
 					
-						ZMQ.Socket supervisorMessage = context.createSocket(SocketType.SUB);
-						supervisorMessage.connect(/*"tcp:// :5555"*/"tcp://"+address+":"+inPort);
-						supervisorMessage.subscribe(user);
-
-						String newTopic =  new String(supervisorMessage.recv(), ZMQ.CHARSET);	
-						// System.out.println("topic: "+ newTopic);
-						supervisorMsgObject = new JSONObject(new String(supervisorMessage.recv(), ZMQ.CHARSET));
-						
-						// makes a hashmap out of the JSONobject
-						// THIS METHOD SHOULD BE A SINGLE METHOD
-						HashMap<String, Object> map2 = new HashMap<>();
-						Iterator<String> iter2 = supervisorMsgObject.keys();
-						while(iter2.hasNext()) {
-							String key = iter2.next();
-							map2.put(key, supervisorMsgObject.get(key));
-						}
-						
-						supervisorsObject.setSupervisorMessage((String) map2.get("message"));
-						//System.out.println("supervisor message: "+supervisorMsgObject.toString()); // TESTITEST
-					}
+					supervisorsObject.setSupervisorMessage((String) map2.get("message"));
 				}
-		
-				gui.setCurrentSupervisors(supervisorList);  // this should be moved to the end of the method when it is finisehed
+			}
 
-
-				subscriber.close();
-				context.close();
-						
-		}
+			gui.setCurrentSupervisors(supervisorList);  // this should be moved to the end of the method when it is finisehed	
 		
 		return null;
 	}
 
-	private Runnable getCurrentQueue(String address, int inPort) {
+	private Runnable getCurrentQueue() {
 		
 		studentList = new LinkedList<Students>();
 
-		try(ZContext context = new ZContext()){
-			ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
+		String msg = subscribe("queue");
+		JSONArray jsonMsg = new JSONArray(msg);
 
-			try {
-					subscriber.connect( /* "tcp://ds.iit.his.se:5555"*/  "tcp://"+address+":"+inPort /*"tcp://localhost:5555" */ );
-				} catch (Exception e) {
-					System.out.println(e);
-				} 
-			
-			subscriber.subscribe("queue");
+		// extracts the String value name from json objects housed in the jsonarray
+		for (int i = 0; i < jsonMsg.length(); i++) {
 
-			try {
-				String topic =  new String(subscriber.recv(), ZMQ.CHARSET);	
-			 	//System.out.println("what topic:"+topic);	
-				} catch (Exception e) {	
-			 		System.out.println(e);
-			}
-			
-			
-			JSONArray jsonMsg = new JSONArray(new String(subscriber.recv(), ZMQ.CHARSET));
+			// converts Json array elements into Json objects
+			JSONObject student = new JSONObject(jsonMsg.get(i).toString());
+			HashMap<String, Object> map = new HashMap<>();
+			Iterator<String> iter = student.keys();
 
-			// extracts the String value name from json objects housed in the jsonarray
-			for (int i = 0; i < jsonMsg.length(); i++) {
-
-				// converts Json array elements into Json objects
-				JSONObject student = new JSONObject(jsonMsg.get(i).toString());
-				HashMap<String, Object> map = new HashMap<>();
-				Iterator<String> iter = student.keys();
-
-				// makes a hashmap out of the JSONobject
-				// THIS METHOD SHOULD BE A SINGLE METHOD
-				while(iter.hasNext()) {
-					String key = iter.next();
-					map.put(key, student.get(key));
-				}
-
-				// extract the value "name" and "ticket" from object and create a new object using that value
-				// these are placed in a linked list.
-				String name = (String) map.get("name");
-				int ticket = (int) map.get("ticket");
-				Students studentObject = new Students(name, ticket);
-				studentList.add(studentObject);
+			// makes a hashmap out of the JSONobject
+			// THIS METHOD SHOULD BE A SINGLE METHOD
+			while(iter.hasNext()) {
+				String key = iter.next();
+				map.put(key, student.get(key));
 			}
 
-			gui.setStudentQueue(studentList);
-			subscriber.close();
-			context.close();
+			// extract the value "name" and "ticket" from object and create a new object using that value
+			// these are placed in a linked list.
+			String name = (String) map.get("name");
+			int ticket = (int) map.get("ticket");
+			Students studentObject = new Students(name, ticket);
+			studentList.add(studentObject);
 		}
+
+		gui.setStudentQueue(studentList);
 		return null;
 	}
 
