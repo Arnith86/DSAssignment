@@ -318,15 +318,14 @@ public class JavaClientGui implements ActionListener{
 		if(e.getSource().equals(nextStudentButton)){
 			// FILL OUT WITH FUNCTIONALITY 
 			System.out.println("next button");
+			if(!user.isBlank()){
+				supervisorJavaClient.takeOnAStudent();
+			}
 		}
 		
 		if(e.getSource().equals(supervisorStatusInput)){
 			// FILL OUT WITH FUNCTIONALITY 
-			if(!user.isBlank()){
 
-				supervisorJavaClient.changeSupervisorStatus(supervisorStatusInput.getSelectedItem().toString());
-				//System.out.println(supervisorStatusInput.getSelectedItem().toString());
-			}
 			
 		}
 

@@ -121,4 +121,31 @@ public class SupervisorJavaClient extends JavaClient  {
 			context.close();
 		}
 	}
+
+	// supervisor takes on the next student in the queue 
+	protected void takeOnAStudent(){
+		try(ZContext context = new ZContext()){
+
+			ZMQ.Socket socket = context.createSocket(SocketType.REQ);			
+			try {
+					socket.connect(/* "tcp://ds.iit.his.se:5557" */  /* "tcp://"+address+":"+outPort*/ "tcp://localhost:5557");
+				} catch (Exception e) {
+					System.out.println(e);
+				} 
+				// {
+				// 	"supervisor": "<name>",
+				// 	"nextStudent": true
+				// }
+			String nextStudent = "{\"supervisor\": \""+user+"\", \"nextStudent\": true}";
+
+			socket.send(nextStudent.getBytes(ZMQ.CHARSET),0);
+
+			byte[] reply = socket.recv(0);
+
+			System.out.println("this was recived: " + new String(reply, ZMQ.CHARSET));  // this should not be written out when application is finished only receive the reply
+
+			socket.close();
+			context.close();
+		}
+	}
 }

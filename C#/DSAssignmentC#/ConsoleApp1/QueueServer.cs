@@ -190,27 +190,22 @@ namespace QueueServerNameSpace{
                                 }
                             }
                         } 
-                        else 
+                        else if (supervisorQueue.ContainsKey(supervisorName))
+                        {
+                            lock (heartbeatDic)
+                            {
+                                heartbeatDic[supervisorName] = 4;
+                                //removeFromList(1);
+                                //removeFromList(4);
+                               // Console.WriteLine(studentName + " " +heartbeatDic[studentName]);
+                                server.SendFrame("{}");
+                            }
+                        }
+                        else
                         {
                             server.SendFrame("{}");
                         }
-                        // else if (supervisorQueue.ContainsKey(supervisorName))
-                        // {
-                        //     lock (heartbeatDic)
-                        //     {
-                        //         heartbeatDic[supervisorName] = 4;
-                        //         //removeFromList(1);
-                        //         //removeFromList(4);
-                        //        // Console.WriteLine(studentName + " " +heartbeatDic[studentName]);
-                        //         server.SendFrame("{}");
-                        //     }
-                        // }
-                        // else
-                        // {
-                        //     server.SendFrame("{}");
-                        // }
                     } 
-                    
                     else if(jsonObj != null && jsonObj.ContainsKey("supervisor") && jsonObj.ContainsKey("message"))
                     {
                         string name = jsonObj.supervisor;
@@ -259,15 +254,24 @@ namespace QueueServerNameSpace{
                             server.SendFrame("{}");    
                         }
                     }
+                    else if(jsonObj != null && jsonObj.ContainsKey("nextStudent"))
+                    {
+                        Console.WriteLine("from NextStudent");
+                        string supervisor = jsonObj.supervisor;
+                        
+                        if(supervisorQueue.ContainsKey(supervisor)){
+                            Console.WriteLine("supervisor: "+supervisorQueue[supervisor].getName()+
+                                              "student: "+supervisorQueue[supervisor].getClientName()  );
+                            server.SendFrame("{\"supervisor\": \""+supervisor+"\", \"nextStudent\": true}");
+                        }
+                        else
+                        {  
+                        server.SendFrame("{}");
+                        }
+                    }
                     else 
                     {   // handles an unexpected json
                         server.SendFrame("{}");
-                    }
-                    
-                    /// HERE FOR TESTING REASIONS 
-                    foreach (KeyValuePair<string, Supervisor> kvp in supervisorQueue)
-                    {
-                        Console.WriteLine("supervisor: "+kvp.Key+" message: "+kvp.Value.getMessage());
                     }
                 }
             }
