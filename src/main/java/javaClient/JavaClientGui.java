@@ -253,6 +253,8 @@ public class JavaClientGui implements ActionListener{
 				
 				if((superervisors.getSupervisorMessage() != null && kindOfClient.equals(clientString))){
 					
+					supervisorMessageLable.setText(superervisors.getSupervisorMessage());
+					// notifys student that its his turn
 					if(notificationSent==false){
 						JOptionPane.showMessageDialog(
 							null,             
@@ -260,10 +262,9 @@ public class JavaClientGui implements ActionListener{
 							"notification",   
 							JOptionPane.INFORMATION_MESSAGE
 						);
+						JOptionPane.getRootFrame().setAlwaysOnTop(true);
 						notificationSent = true;
-					}
-					
-					supervisorMessageLable.setText(superervisors.getSupervisorMessage()); 
+					} 
 				}	
 				supervisorsPanel.add(availableSupervisors);
 				
