@@ -44,7 +44,6 @@ public class JavaClientGui implements ActionListener{
 	private JFrame applicationFrame;
 	
 	private JPanel inputPanel;
-	// IMPLEMENT THE ADDRESS PANEL !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	private JPanel addressPanel;
 	private JLabel serverLabel; 
@@ -242,7 +241,7 @@ public class JavaClientGui implements ActionListener{
 		} else {
 			
 			superervisorList.forEach(superervisors -> {
-			
+				System.out.println(superervisors.getStatus());
 				if(superervisors.getStudentName().equals("undefined")){
 					availableSupervisors = new JLabel(superervisors.getSupervisorName()+": "+superervisors.getStatus());
 				} else {
@@ -325,7 +324,9 @@ public class JavaClientGui implements ActionListener{
 		
 		if(e.getSource().equals(supervisorStatusInput)){
 			// FILL OUT WITH FUNCTIONALITY 
-
+			if(!user.isBlank()){
+				supervisorJavaClient.changeSupervisorStatus(supervisorStatusInput.getSelectedItem().toString());
+			}
 			
 		}
 

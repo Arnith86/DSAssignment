@@ -27,7 +27,7 @@ namespace QueueServerNameSpace
         } 
 
         public void setStatus(string status){
-            this.status = status;    
+            this.status = status;  
         }
         public void setSupervisorMessage(string message){
             this.message = message;

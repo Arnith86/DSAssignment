@@ -23,8 +23,6 @@ public class JavaClient {
 	protected int outPortNummber;
 	protected String currentSupervisorStatus;
 
-	private Boolean fullAddressSupplied;
-
 	private JavaClientGui gui;
 	private LinkedList<Students> studentList;
 	private LinkedList<Supervisors> supervisorList;
@@ -35,7 +33,6 @@ public class JavaClient {
 		// IN TESTING
 		this.gui = gui;
 		queueUpdater = Executors.newScheduledThreadPool(2);
-		//fullAddressSupplied = false;
 	}
 
 
@@ -102,15 +99,12 @@ public class JavaClient {
 		queueUpdater = Executors.newScheduledThreadPool(1);
 		queueUpdater.scheduleWithFixedDelay(() -> getCurrentQueue(), 0 , 500 , TimeUnit.MILLISECONDS);  
 		queueUpdater.scheduleWithFixedDelay(() -> getCurrentSupervisors(), 0 , 550 , TimeUnit.MILLISECONDS);
-		// this.fullAddressSupplied = true;  THIS IS CURRENTLY NOT FUNCTIONING
 	}
 
 	// Will display available supervisors
 	// STILL IN TESTING !!!!!!!!!!!!!!!!
 	private Runnable getCurrentSupervisors() {
-		//if (fullAddressSupplied == true){     // WE NEED TO STOP A CONNECTION FROM HAPPENING IF NO ADDRESS HAS BEEN GIVEN
-		// ^THIS IS CURRENTLY NOT FUNCTIONING
-
+	
 		supervisorList = new LinkedList<Supervisors>();
 		String msg =  subscribe("supervisors");
 		JSONArray jsonMsg = new JSONArray(msg);
