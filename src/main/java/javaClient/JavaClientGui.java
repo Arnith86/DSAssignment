@@ -15,6 +15,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -26,6 +27,8 @@ public class JavaClientGui implements ActionListener{
 
 	protected String kindOfClient;
 	private String supervisorString = "supervisor";
+	private String clientString = "student";
+	private Boolean notificationSent = false; 
 	private String supervisorStatusInputArray[] = {"pending", "available","occupied"};
 	protected String currentSupervisorStatus="pending";  
 	private static String user=""; 
@@ -248,7 +251,18 @@ public class JavaClientGui implements ActionListener{
 					availableSupervisors = new JLabel(superervisors.getSupervisorName()+": "+superervisors.getStatus()+ "  - "+"Helping: "+superervisors.getStudentName());
 				}
 				
-				if((superervisors.getSupervisorMessage() != null )){
+				if((superervisors.getSupervisorMessage() != null && kindOfClient.equals(clientString))){
+					
+					if(notificationSent==false){
+						JOptionPane.showMessageDialog(
+							null,             
+							"It's Your Turn Now!",   
+							"notification",   
+							JOptionPane.INFORMATION_MESSAGE
+						);
+						notificationSent = true;
+					}
+					
 					supervisorMessageLable.setText(superervisors.getSupervisorMessage()); 
 				}	
 				supervisorsPanel.add(availableSupervisors);
@@ -257,8 +271,6 @@ public class JavaClientGui implements ActionListener{
 		}	
 		centerPanel.add(supervisorMessageLable);
 		centerPanel.add(supervisorsPanel);
-		 // applicationFrame.revalidate(); 
-		 // applicationFrame.repaint();
 	}
 
 	
@@ -270,9 +282,6 @@ public class JavaClientGui implements ActionListener{
 			
 			if(fullAddressSupplied == true){
 				this.user = nameInput.getText();
-				 
-				// String textNameInput = nameInput.getText();
-				// this.user = textNameInput;
 				
 				if(kindOfClient.equals(supervisorString)){
 					supervisorJavaClient.setUser(user, currentSupervisorStatus);
@@ -315,15 +324,12 @@ public class JavaClientGui implements ActionListener{
 		}
 
 		if(e.getSource().equals(nextStudentButton)){
-			// FILL OUT WITH FUNCTIONALITY 
-			System.out.println("next button");
 			if(!user.isBlank()){
 				supervisorJavaClient.takeOnAStudent();
 			}
 		}
 		
 		if(e.getSource().equals(supervisorStatusInput)){
-			// FILL OUT WITH FUNCTIONALITY 
 			if(!user.isBlank()){
 				supervisorJavaClient.changeSupervisorStatus(supervisorStatusInput.getSelectedItem().toString());
 			}
@@ -331,15 +337,9 @@ public class JavaClientGui implements ActionListener{
 		}
 
 		if(e.getSource().equals(messageInputField)){
-			// FILL OUT WITH FUNCTIONALITY 
 			if(!user.isBlank()){
-				supervisorJavaClient.registerSupervisorMessage(messageInputField.getText());
-				//System.out.println(messageInputField.getText());
-				
+				supervisorJavaClient.registerSupervisorMessage(messageInputField.getText());	
 			}
-			
 		}
-		
 	}
-	
 }

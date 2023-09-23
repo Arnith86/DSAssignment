@@ -28,7 +28,9 @@ public class JavaClient {
 	private LinkedList<Supervisors> supervisorList;
 
 	private ScheduledExecutorService queueUpdater;
-	protected JavaClientHeartbeatTread heartbeat = new JavaClientHeartbeatTread(user, serverAddress, outPortNummber);
+	protected JavaClientHeartbeatTread heartbeat; 
+	protected Thread heartbeatThread; 
+
 
 	public JavaClient (JavaClientGui gui){
 		// IN TESTING
@@ -228,7 +230,8 @@ public class JavaClient {
 			System.out.println("this was recived: " + new String(reply, ZMQ.CHARSET));  // this should not be written out when application is finished only receive the reply
 
 			// IN TESTING
-			Thread heartbeatThread = new Thread(heartbeat);
+			heartbeat = new JavaClientHeartbeatTread(user, serverAddress, outPortNummber);
+			heartbeatThread = new Thread(heartbeat);
 			heartbeatThread.start();
 			// IN TESTING
 			// THIS MUST BE TERMINATED WHEN supervisor removes student from list
