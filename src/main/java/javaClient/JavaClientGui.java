@@ -241,7 +241,7 @@ public class JavaClientGui implements ActionListener{
 		} else {
 			
 			superervisorList.forEach(superervisors -> {
-				System.out.println(superervisors.getStatus());
+				
 				if(superervisors.getStudentName().equals("undefined")){
 					availableSupervisors = new JLabel(superervisors.getSupervisorName()+": "+superervisors.getStatus());
 				} else {

@@ -91,8 +91,6 @@ namespace QueueServerNameSpace{
                 {
                     Thread removeFromListThread = new Thread(removeFromList);  // IS THIS STILL NEEDED?!
                     string msg = server.ReceiveFrameString();
-                    //Console.WriteLine("From Client: {0}", msg);
-                    //server.SendFrame("{}");
                     
                     dynamic jsonObj = JsonConvert.DeserializeObject(msg);
                     string studentName = jsonObj.name;
@@ -118,9 +116,6 @@ namespace QueueServerNameSpace{
                         lock (heartbeatDic)
                         {
                             heartbeatDic[studentName] = 4;
-                            //removeFromList(1);
-                            //removeFromList(4);
-                           // Console.WriteLine(studentName + " " +heartbeatDic[studentName]);
                             server.SendFrame("{}");
                         }
                     }
@@ -148,22 +143,8 @@ namespace QueueServerNameSpace{
                     // }
                     
                     string request = server.ReceiveFrameString();
-                    //Console.WriteLine("From Client: {0}", msg);
-                    //server.SendFrame("{}");
                     
                     dynamic jsonObj = JsonConvert.DeserializeObject(request);
-
-                    // JObject jsonObject = jsonObj;
-
-                    // foreach (var property in jsonObject.Properties())
-                    // {
-                    //     string key = property.Name;
-                    //     JToken value = property.Value;
-
-                    //     // Key is the name of the property, and value is the corresponding value
-                    //     Console.WriteLine($"Key: {key}, Value: {value}");
-                    // }
-                    
                                        
                     if(jsonObj !=null && jsonObj.ContainsKey("enterSupervisorQueue"))
                     {
@@ -180,7 +161,6 @@ namespace QueueServerNameSpace{
                                 {
                                     supervisor = new Supervisor(supervisorName, status);
                                     supervisorQueue[supervisorName] = supervisor;  
-                                    // supervisorQueue.Add(supervisorName, supervisor); 
                                     heartbeatDic.Add(supervisorName, 4);
 
                                     server.SendFrame("{\r\n" + 
@@ -195,9 +175,6 @@ namespace QueueServerNameSpace{
                             lock (heartbeatDic)
                             {
                                 heartbeatDic[supervisorName] = 4;
-                                //removeFromList(1);
-                                //removeFromList(4);
-                               // Console.WriteLine(studentName + " " +heartbeatDic[studentName]);
                                 server.SendFrame("{}");
                             }
                         }
@@ -270,7 +247,7 @@ namespace QueueServerNameSpace{
                                         
                                         supervisorQueue[supervisor].setSupervising(studentName, studentTicket);
                                         queueList.Remove(firstElement.Key);
-                                        
+
                                         lock(heartbeatDic){
                                             heartbeatDic.Remove(firstElement.Value);
                                         }
@@ -408,11 +385,7 @@ namespace QueueServerNameSpace{
          public static void setupSupervisorQueueDic(){
             /// everything within these comments are to be removed when the supervisor client can send data instead
             supervisor = new Supervisor("Simon", "Available");
-            //supervisor.setSupervising();
             supervisor.setSupervisorMessage("This is a serius message with supervising instructions");
-            // supervisorQueue.Add(supervisor.getName(), supervisor);
-            // supervisor = new Supervisor("Erik", "Available");
-            // supervisorQueue.Add(supervisor.getName(), supervisor);
             supervisorQueue[supervisor.getName()] = supervisor;
             supervisor = new Supervisor("Erik", "Available");
             supervisorQueue[supervisor.getName()] = supervisor;
