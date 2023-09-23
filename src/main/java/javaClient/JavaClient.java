@@ -28,6 +28,7 @@ public class JavaClient {
 	private LinkedList<Supervisors> supervisorList;
 
 	private ScheduledExecutorService queueUpdater;
+	protected JavaClientHeartbeatTread heartbeat = new JavaClientHeartbeatTread(user, serverAddress, outPortNummber);
 
 	public JavaClient (JavaClientGui gui){
 		// IN TESTING
@@ -227,7 +228,6 @@ public class JavaClient {
 			System.out.println("this was recived: " + new String(reply, ZMQ.CHARSET));  // this should not be written out when application is finished only receive the reply
 
 			// IN TESTING
-			JavaClientHeartbeatTread heartbeat = new JavaClientHeartbeatTread(user, address, outPort);
 			Thread heartbeatThread = new Thread(heartbeat);
 			heartbeatThread.start();
 			// IN TESTING

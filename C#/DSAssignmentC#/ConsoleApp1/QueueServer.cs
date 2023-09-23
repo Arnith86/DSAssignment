@@ -263,12 +263,19 @@ namespace QueueServerNameSpace{
                             lock(queueList){
                                 lock(supervisorQueue){
 
-                                    KeyValuePair<int,string> firstElement = queueList.First();
-                                    int studentTicket = firstElement.Key;
-                                    string studentName = firstElement.Value;
+                                    if(queueList.Count > 0){
+                                        KeyValuePair<int,string> firstElement = queueList.First();
+                                        int studentTicket = firstElement.Key;
+                                        string studentName = firstElement.Value;
+                                        
+                                        supervisorQueue[supervisor].setSupervising(studentName, studentTicket);
+                                        queueList.Remove(firstElement.Key);
+                                        
+                                        lock(heartbeatDic){
+                                            heartbeatDic.Remove(firstElement.Value);
+                                        }
                                     
-                                    supervisorQueue[supervisor].setSupervising(studentName, studentTicket);
-                                    queueList.Remove(firstElement.Key);               
+                                    }               
                                 }
                             }
 
