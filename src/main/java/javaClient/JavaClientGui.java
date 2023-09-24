@@ -79,7 +79,8 @@ public class JavaClientGui implements ActionListener{
 	private JPanel centerPanel;
 	
 	private JPanel queuePanel; 
-	private JPanel newQueueEntry; 
+	private JPanel newQueueEntry;
+	private JLabel studentLabel;  
 	
 	public void setSupervisorClientObject(SupervisorJavaClient supervisorJavaClient){
 		this.supervisorJavaClient = supervisorJavaClient;
@@ -204,26 +205,34 @@ public class JavaClientGui implements ActionListener{
 	public void setStudentQueue(LinkedList<Students> studentList){
 		
 		queuePanel.removeAll();
-		
-		studentList.forEach(students -> {
+	
+		if (studentList.isEmpty()) {
+
+			studentLabel = new JLabel("There are no students in the queue!");
 			newQueueEntry = new JPanel(); 
-			JLabel tempLabel = new JLabel(students.getName());
-			
-			// is the supplied username is in the queue it will be underlined
-			if(students.getName().equals(user)) {
-				
-				// underlines the label 
-				Font font = tempLabel.getFont();
-				Map attributes = font.getAttributes();
-				attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
-				tempLabel.setFont(font.deriveFont(attributes));
-				
-			}
-			
-			newQueueEntry.add(tempLabel);
+			newQueueEntry.add(studentLabel);
 			queuePanel.add(newQueueEntry);
+		
+		} else {
+
+			studentList.forEach(students -> {
+				studentLabel = new JLabel(students.getName());
+				
+				if (students.getName().equals(user)) {
+					// Underline the label
+					Font font = studentLabel.getFont();
+					Map attributes = font.getAttributes();
+					attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+					studentLabel.setFont(font.deriveFont(attributes));
+				}
+				
+				newQueueEntry = new JPanel(); 
+				newQueueEntry.add(studentLabel);
+				queuePanel.add(newQueueEntry);
+			});
+		}
+		
 			
-		});
 		centerPanel.add(queuePanel);
 		// this will reprint the applicationFrame for bouth setStudentQueue and setCurrentSupervisors
 		applicationFrame.revalidate(); 

@@ -10,10 +10,5 @@ public class JavaSupervisorClientExecutor {
 
         gui.setSupervisorClientObject(supervisorJavaClient);
         gui.setClientObject(client); 
-		//ScheduledExecutorService queueUpdater;
-		// queueUpdater = Executors.newScheduledThreadPool(1);
-		// // queueUpdater.scheduleWithFixedDelay(() -> javaClient.getCurrentQueue(), 0 , 500 , TimeUnit.MILLISECONDS);
-		// queueUpdater.scheduleWithFixedDelay(() -> javaClient.getCurrentSupervisors(), 0 , 500 , TimeUnit.MILLISECONDS);
-
 	}
 }
