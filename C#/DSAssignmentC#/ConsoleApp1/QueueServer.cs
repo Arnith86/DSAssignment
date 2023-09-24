@@ -21,23 +21,41 @@ namespace QueueServerNameSpace{
         static ConcurrentDictionary <string, Supervisor> supervisorQueue = new ConcurrentDictionary<string, Supervisor>();
         public static void sendList(IDictionary<string, Supervisor> supervisorQueue)
         {
-            
+
             //add three diffrent element to the dictionary, dictionary.Add(x, x) to add new elements.
-            queueList.Add(2, "Two");
-            queueList.Add(3, "Three");
-            queueList.Add(1, "One");
-            heartbeatDic["One"] = 40;
-            heartbeatDic["Two"] = 400;
-            heartbeatDic["Three"] = 400;
+
+            
+
+            lock (queueList)
+            {
+                lock (heartbeatDic)
+                {
+                    
+                    queueList =
+                    JsonConvert.DeserializeObject<SortedDictionary<int, string>>
+                                         (File.ReadAllText(@".\queueListSave.txt"));
+
+                    heartbeatDic.Clear();
+
+                    foreach (KeyValuePair<int, string> pair in queueList)
+                    {
+                        heartbeatDic[pair.Value] = 4;
+                    }
+                }
+            }
+            
             // heartbeatDic.Add("One", 40);
             // heartbeatDic.Add("Two", 400);
             // heartbeatDic.Add("Three", 400);
+            Console.Clear();
+            Console.WriteLine("-----------------------------------");
+            Console.WriteLine("");
+            Console.WriteLine("-----------------------------------");
             foreach (var kvp in queueList)
             {
                 Console.WriteLine("ticket = {0}, name = {1}", kvp.Key, kvp.Value);
             }
             Console.WriteLine("-----------------------------------");
-           
             Thread addToListThread = new Thread(new ThreadStart(addToList));
             addToListThread.Start();
             Thread countdownThread = new Thread(countdown);
@@ -93,12 +111,10 @@ namespace QueueServerNameSpace{
                 server.Bind("tcp://*:5556");
                 while (true)
                 {
-                    Thread removeFromListThread = new Thread(removeFromList);  // IS THIS STILL NEEDED?!
                     string msg = server.ReceiveFrameString();
                     
                     dynamic jsonObj = JsonConvert.DeserializeObject(msg);
                     string studentName = jsonObj.name;
-                    Console.WriteLine(jsonObj);
                     if (!(queueList.ContainsValue(studentName)) && jsonObj != null && jsonObj.ContainsKey("enterQueue"))
                     {
                         lock (queueList)
@@ -117,6 +133,17 @@ namespace QueueServerNameSpace{
                                 //heartbeatDic.AddOrUpdate<> (studentName, 4); 
 
                                 server.SendFrame("{\"ticket\": " + newMaxKey + ", \"name\": \"" + studentName + "\"}");
+                                Console.Clear();
+                                Console.WriteLine("-----------------------------------");
+                                Console.WriteLine(studentName + " was added to the queue");
+                                Console.WriteLine("-----------------------------------");
+                                foreach (var kvp in queueList)
+                                {
+                                    Console.WriteLine("ticket = {0}, name = {1}", kvp.Key, kvp.Value);
+                                }
+                                Console.WriteLine("-----------------------------------");
+                                string json = JsonConvert.SerializeObject(queueList);
+                                File.WriteAllText(@".\queueListSave.txt", json);
                             }
                         }
                     }
@@ -265,11 +292,12 @@ namespace QueueServerNameSpace{
                                             heartbeatDic.TryRemove(studentName, out int removedValue);
                                             //heartbeatDic.Remove(firstElement.Value);
                                         }
-
+                                        string json = JsonConvert.SerializeObject(queueList);
+                                        File.WriteAllText(@".\queueListSave.txt", json);
                                         // KeyValuePair<int,string> firstElement = queueList.First();
                                         // int studentTicket = firstElement.Key;
                                         // string studentName = firstElement.Value;
-                                        
+
                                     }               
                                 }
                             }
@@ -291,7 +319,6 @@ namespace QueueServerNameSpace{
 
         public static void countdown()
         {
-            Thread removeFromListThread = new Thread(removeFromList);
             string removedStudent;
             while (true)
             {
@@ -309,9 +336,18 @@ namespace QueueServerNameSpace{
                             foreach (var item in itemsToRemove)
                                 queueList.Remove(item.Key);
                                 heartbeatDic.TryRemove(removedStudent, out int removedValue);
-                                // heartbeatDic.Remove((string)removedStudent);
-                                // queueList.Remove(pa.Key);
-                                    
+                                Console.Clear();
+                                Console.WriteLine("-----------------------------------");
+                                Console.WriteLine(removedStudent + " was removed from the queue");
+                                Console.WriteLine("-----------------------------------");
+                                foreach (var kvp in queueList)
+                                {
+                                    Console.WriteLine("ticket = {0}, name = {1}", kvp.Key, kvp.Value);
+                                }
+                                Console.WriteLine("-----------------------------------");
+                                string json = JsonConvert.SerializeObject(queueList);
+                                File.WriteAllText(@".\queueListSave.txt", json);
+
                             }
                         }
                     }
