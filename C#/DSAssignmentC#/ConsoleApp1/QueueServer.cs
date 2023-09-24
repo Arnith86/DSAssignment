@@ -259,27 +259,17 @@ namespace QueueServerNameSpace{
                                         supervisorQueue[supervisor].setSupervising(studentName, studentTicket);
                                        
                                         queueList.Remove(firstElement.Key);
-                                        Console.WriteLine(queueList.Count);
+                                        // Console.WriteLine(queueList.Count);
                                         
                                         lock(heartbeatDic){
-                                            foreach (var kvp in heartbeatDic)
-                                            {
-                                                string key = kvp.Key;
-                                                int value = kvp.Value;
-                                                
-                                                Console.WriteLine($"Key: {key}, Value: {value}");
-                                            }
                                             heartbeatDic.TryRemove(studentName, out int removedValue);
                                             //heartbeatDic.Remove(firstElement.Value);
-                                            foreach (var kvp in heartbeatDic)
-                                            {
-                                                string key = kvp.Key;
-                                                int value = kvp.Value;
-                                                
-                                                Console.WriteLine($"Key: {key}, Value: {value}");
-                                            }
                                         }
-                                    
+
+                                        // KeyValuePair<int,string> firstElement = queueList.First();
+                                        // int studentTicket = firstElement.Key;
+                                        // string studentName = firstElement.Value;
+                                        
                                     }               
                                 }
                             }

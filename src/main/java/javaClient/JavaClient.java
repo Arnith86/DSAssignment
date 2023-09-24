@@ -164,8 +164,13 @@ public class JavaClient {
 						String key = iter2.next();
 						map2.put(key, supervisorMsgObject.get(key));
 					}
+
+					String supervisorMessage = (String) map2.get("message");
 					
-					supervisorsObject.setSupervisorMessage((String) map2.get("message"));
+					if (supervisorMessage != null) {
+						supervisorsObject.setSupervisorMessage(supervisorMessage);	 
+					}
+					// supervisorsObject.setSupervisorMessage((String) map2.get("message"));
 				}
 		}
 

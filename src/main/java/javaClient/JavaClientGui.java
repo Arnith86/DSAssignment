@@ -259,7 +259,7 @@ public class JavaClientGui implements ActionListener{
 				} else {
 					availableSupervisors = new JLabel(superervisors.getSupervisorName()+": "+superervisors.getStatus()+ "  - "+"Helping: "+superervisors.getStudentName());
 				}
-				
+
 				if((superervisors.getSupervisorMessage() != null && kindOfClient.equals(clientString))){
 					
 					supervisorMessageLable.setText(superervisors.getSupervisorMessage());
