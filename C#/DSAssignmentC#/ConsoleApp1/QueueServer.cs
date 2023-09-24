@@ -15,7 +15,8 @@ namespace QueueServerNameSpace{
         static string undefined = "undefined";
         //Dictionary that hold the queue list
         static SortedDictionary<int, string> queueList = new SortedDictionary<int, string>();
-        static Dictionary<string, int> heartbeatDic = new Dictionary<string, int>();
+        static ConcurrentDictionary <string, int> heartbeatDic = new ConcurrentDictionary<string, int>();
+        //static Dictionary<string, int> heartbeatDic = new Dictionary<string, int>();
         static Supervisor supervisor;
         static ConcurrentDictionary <string, Supervisor> supervisorQueue = new ConcurrentDictionary<string, Supervisor>();
         public static void sendList(IDictionary<string, Supervisor> supervisorQueue)
@@ -25,9 +26,12 @@ namespace QueueServerNameSpace{
             queueList.Add(2, "Two");
             queueList.Add(3, "Three");
             queueList.Add(1, "One");
-            heartbeatDic.Add("One", 40);
-            heartbeatDic.Add("Two", 400);
-            heartbeatDic.Add("Three", 400);
+            heartbeatDic["One"] = 40;
+            heartbeatDic["Two"] = 400;
+            heartbeatDic["Three"] = 400;
+            // heartbeatDic.Add("One", 40);
+            // heartbeatDic.Add("Two", 400);
+            // heartbeatDic.Add("Three", 400);
             foreach (var kvp in queueList)
             {
                 Console.WriteLine("ticket = {0}, name = {1}", kvp.Key, kvp.Value);
@@ -101,11 +105,16 @@ namespace QueueServerNameSpace{
                         {
                             lock (heartbeatDic)
                             {
-                                var maxKey = queueList.Keys.Max();
-                                int newMaxKey = maxKey + 1;
+                                int newMaxKey;
+                                
+                                if(queueList.Count() > 0 ){
+                                    var maxKey = queueList.Keys.Max();
+                                    newMaxKey = maxKey + 1;   
+                                } else { newMaxKey = 1; }
+                                
                                 queueList.Add(newMaxKey, studentName);
-                                heartbeatDic.Add(studentName, 4);
-
+                                heartbeatDic.AddOrUpdate(studentName, 4, (existingKey, existingValue) => 4);
+                                //heartbeatDic.AddOrUpdate<> (studentName, 4); 
 
                                 server.SendFrame("{\"ticket\": " + newMaxKey + ", \"name\": \"" + studentName + "\"}");
                             }
@@ -160,9 +169,11 @@ namespace QueueServerNameSpace{
                                 lock (heartbeatDic)
                                 {
                                     supervisor = new Supervisor(supervisorName, status);
-                                    supervisorQueue[supervisorName] = supervisor;  
-                                    heartbeatDic.Add(supervisorName, 4);
+                                    supervisorQueue[supervisorName] = supervisor;
 
+                                    heartbeatDic.AddOrUpdate(supervisorName, 4, (existingKey, existingValue) => 4);
+                                    //heartbeatDic.Add(supervisorName, 4);
+                                    
                                     server.SendFrame("{\r\n" + 
                                             "          \"name\": \""+supervisorName+"\",\r\n" + 
                                             "          \"status\": \""+status+"\", \r\n" + 
@@ -240,16 +251,33 @@ namespace QueueServerNameSpace{
                             lock(queueList){
                                 lock(supervisorQueue){
 
-                                    if(queueList.Count > 0){
+                                    if(queueList.Count > 0 ){
                                         KeyValuePair<int,string> firstElement = queueList.First();
                                         int studentTicket = firstElement.Key;
                                         string studentName = firstElement.Value;
                                         
                                         supervisorQueue[supervisor].setSupervising(studentName, studentTicket);
+                                       
                                         queueList.Remove(firstElement.Key);
-
+                                        Console.WriteLine(queueList.Count);
+                                        
                                         lock(heartbeatDic){
-                                            heartbeatDic.Remove(firstElement.Value);
+                                            foreach (var kvp in heartbeatDic)
+                                            {
+                                                string key = kvp.Key;
+                                                int value = kvp.Value;
+                                                
+                                                Console.WriteLine($"Key: {key}, Value: {value}");
+                                            }
+                                            heartbeatDic.TryRemove(studentName, out int removedValue);
+                                            //heartbeatDic.Remove(firstElement.Value);
+                                            foreach (var kvp in heartbeatDic)
+                                            {
+                                                string key = kvp.Key;
+                                                int value = kvp.Value;
+                                                
+                                                Console.WriteLine($"Key: {key}, Value: {value}");
+                                            }
                                         }
                                     
                                     }               
@@ -290,7 +318,8 @@ namespace QueueServerNameSpace{
                             var itemsToRemove = queueList.Where(f => f.Value == removedStudent).ToArray();
                             foreach (var item in itemsToRemove)
                                 queueList.Remove(item.Key);
-                                heartbeatDic.Remove((string)removedStudent);
+                                heartbeatDic.TryRemove(removedStudent, out int removedValue);
+                                // heartbeatDic.Remove((string)removedStudent);
                                 // queueList.Remove(pa.Key);
                                     
                             }
@@ -307,6 +336,7 @@ namespace QueueServerNameSpace{
             }
         }
 
+        // THIS IS EMPTY if we are not going to use it, remove it.
         public static void removeFromList(object removedStudent)
         {
 
