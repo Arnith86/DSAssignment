@@ -7,16 +7,18 @@ namespace QueueServerNameSpace
     public class Supervisor{
 
         static string undefined = "undefined";
+        private string UUID; 
         private string name; 
         private string status;
         private string clientName; 
         private int clientTicket; 
-
-        private string message; 
+        private string message;
+        private int heartbeat; 
  
-        public Supervisor(string name, string status){
+        public Supervisor(string name, string status, string UUID){
             this.name = name;
             this.status = status;
+            this.UUID = UUID; 
             clientName = undefined;    
         }
 
@@ -32,6 +34,15 @@ namespace QueueServerNameSpace
         public void setSupervisorMessage(string message){
             this.message = message;
         }
+
+        public void setUUID(string UUID){
+            this.UUID = UUID;
+        }
+
+        public void setHeartbeat(int heartbeat){
+            this.heartbeat = heartbeat;
+        }
+
         public string getClientName(){
             return clientName;
         }
@@ -50,6 +61,14 @@ namespace QueueServerNameSpace
 
         public string getMessage(){
             return message; 
+        }
+
+        public string getUUID(){
+            return this.UUID;
+        }
+
+        public int getHeartbeat(){
+            return this.heartbeat;
         }
 
     }

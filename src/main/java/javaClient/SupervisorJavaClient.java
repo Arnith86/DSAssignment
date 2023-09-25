@@ -27,7 +27,6 @@ public class SupervisorJavaClient extends JavaClient  {
     }
 
     // places supplied user in the server queue
-	// TODO!!!!!   WE NEED TO CREATE A UID SOMEHOW!!!!!!!!!!!!!!!!!!!!!!
 	private void enterSupervisorQueue(String user, String address, int outPort) {
        
 		if(newUUID == null){

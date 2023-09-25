@@ -30,8 +30,9 @@ public class JavaClient {
 	private LinkedList<Supervisors> supervisorList;
 
 	private ScheduledExecutorService queueUpdater;
+	protected ScheduledExecutorService heartbeatThread;
 	protected JavaClientHeartbeatTread heartbeat; 
-	protected Thread heartbeatThread; 
+	// protected Thread heartbeatThread; 
 
 
 	public JavaClient (JavaClientGui gui){
@@ -82,23 +83,28 @@ public class JavaClient {
 	}
 
 
+	private void cheackAndShutdownThreads(ScheduledExecutorService threadpool){
+		ThreadPoolExecutor executor = (ThreadPoolExecutor) threadpool;
+			int activeThreadCount = executor.getActiveCount();
+			System.out.println("active: "+activeThreadCount);
+			if(activeThreadCount > 0){
+				
+				threadpool.shutdown();
+				System.out.println("not shutdown: active: "+activeThreadCount);
+			}
+			System.out.println("active: "+activeThreadCount);
+	}
+
 	public void setAddressAndPorts(String address, int inPort, int outPort){
 		
 		serverAddress = address;
 		inPortNummber = inPort;
 		outPortNummber = outPort;
 
-		// if any existing threads are active this will shut them down, and clean the current lists
+		// if any active thread exist this will shut them down
 		if(!queueUpdater.isShutdown()){
 		
-			ThreadPoolExecutor executor = (ThreadPoolExecutor) queueUpdater;
-			int activeThreadCount = executor.getActiveCount();
-			if(activeThreadCount > 0){
-				queueUpdater.shutdown();
-				// studentList.clear();
-				// supervisorList.clear();
-				System.out.println("not shutdown: active: "+activeThreadCount);
-			}
+			cheackAndShutdownThreads(queueUpdater);
 		}	
 		
 		queueUpdater = Executors.newScheduledThreadPool(1);
@@ -119,7 +125,7 @@ public class JavaClient {
 		return map; 
 	}
 
-	// Will display available supervisors
+	// Collects available supervisors
 	private Runnable getCurrentSupervisors() {
 	
 		supervisorList = new LinkedList<Supervisors>();
@@ -174,6 +180,7 @@ public class JavaClient {
 		return null;
 	}
 
+	// collects the contents of the student queue
 	private Runnable getCurrentQueue() {
 		
 		studentList = new LinkedList<Students>();
@@ -207,6 +214,7 @@ public class JavaClient {
 		
 		if(newUUID == null){
 			newUUID = UUID.randomUUID();
+
 		}
 		 
 
@@ -228,12 +236,25 @@ public class JavaClient {
 			System.out.println("this was recived: " + new String(reply, ZMQ.CHARSET));  // this should not be written out when application is finished only receive the reply
 
 			// IN TESTING
-			heartbeat = new JavaClientHeartbeatTread(user, serverAddress, outPortNummber);
-			heartbeatThread = new Thread(heartbeat);
-			heartbeatThread.start();
-			// IN TESTING
-			// THIS MUST BE TERMINATED WHEN supervisor removes student from list
-			//context.destroy();
+			
+			if(heartbeatThread != null && !heartbeatThread.isShutdown()){
+				// cheackAndShutdownThreads(heartbeatThread);
+				heartbeatThread.shutdown(); 
+				heartbeat = new JavaClientHeartbeatTread(user, serverAddress, outPortNummber, newUUID);
+			} else {
+				heartbeat = new JavaClientHeartbeatTread(user, serverAddress, outPortNummber, newUUID);
+			}
+			
+			heartbeatThread = Executors.newScheduledThreadPool(1);
+			heartbeatThread.scheduleWithFixedDelay(() -> heartbeat(heartbeat), 0 , 500 , TimeUnit.MILLISECONDS);  
+			
+			socket.close();
+			context.close();
 		}
 	}
+
+	private Runnable heartbeat(JavaClientHeartbeatTread heartbeat){
+		heartbeat.heartbeat();
+		return null; 
+	} 
 }
