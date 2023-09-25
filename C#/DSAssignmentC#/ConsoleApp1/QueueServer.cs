@@ -45,22 +45,34 @@ namespace QueueServerNameSpace{
                     }
                 // }
             }
-            
+            student = new Student("JP", 1, "UUID3");
+            student.setHeartbeat(400);
+            queueList[student.getName()+student.getUUID()] = student;
+            student = new Student("Adam", 2, "UUID4");
+            student.setHeartbeat(400);
+            queueList[student.getName()+student.getUUID()] = student;
+
             // heartbeatDic.Add("One", 40);
             // heartbeatDic.Add("Two", 400);
             // heartbeatDic.Add("Three", 400);
-            Console.Clear();
+            //Console.Clear();       <----------------------------------------/// THIS ROW COUSES ERRORS 
             Console.WriteLine("-----------------------------------");
             Console.WriteLine("");
             Console.WriteLine("-----------------------------------");
+            // USED FOR TESTING 
             foreach (var kvp in queueList)
             {
-                Console.WriteLine("ticket = {0}, name = {1}", kvp.Key, kvp.Value);
+                Console.WriteLine("ticket = "+kvp.Value.getTicket()+ " name = "+kvp.Value.getName()+ " UUID: "+kvp.Value.getUUID() );
             }
+             foreach (var kvp in supervisorQueue)
+            {
+                Console.WriteLine("name = "+kvp.Value.getName()+ " UUID: "+kvp.Value.getUUID() );
+            }
+            Console.WriteLine("-----------------------------------");
             Console.WriteLine("-----------------------------------");
             Thread addToListThread = new Thread(new ThreadStart(addToList));
             addToListThread.Start();
-            Thread countdownThread = new Thread(countdown);
+            Thread countdownThread = new Thread(countdown);        
             countdownThread.Start();
             Thread addToSupervisorListThread = new Thread(addToSupervisorList);
             addToSupervisorListThread.Start();
@@ -71,17 +83,9 @@ namespace QueueServerNameSpace{
                 while (true)
                 {
 
-                    lock (queueList)
-                    {
-                        // static string MyDictionaryToJson(IDictionary<int, string> dict)
-                        // {
-                        //     //Thread.Sleep(3);
-                        //     var x = dict.Select(d =>
-                        //             string.Format("\"ticket\": {0}, \"name\": \"{1}\"", d.Key, string.Join(",", d.Value)));
-                        //     return "[{" + string.Join("},{", x) + "}]";
-                        // }
-                        // string js2 = MyDictionaryToJson(queueList);
-
+                    // lock (queueList)    <<-------------------------- WOULD NOT GET PAST THIS LOCK 
+                    // {
+                        
                         // Publishes the student queue
                         pub.SendMoreFrame("queue").SendFrame(sendStudentList());
                         // Publishes the supervisor queue
@@ -101,7 +105,7 @@ namespace QueueServerNameSpace{
                                 pub.SendMoreFrame(clientName).SendFrame(sendSupervisorMessage(supervisorMessage, supervisorName));
                             }
                         }                                                                
-                    }
+                    // }
                 }
             }  
         }
@@ -121,7 +125,7 @@ namespace QueueServerNameSpace{
                     
                     if (!queueList.ContainsKey(studentName+UUID) && jsonObj != null && jsonObj.ContainsKey("enterQueue"))
                     {
-                        lock (queueList)
+                    //    lock (queueList)                            <-------------- STOPS EXECUTION :C:C
                         {
                             // lock (heartbeatDic)
                             // {
@@ -363,7 +367,7 @@ namespace QueueServerNameSpace{
                             //foreach (var item in itemsToRemove)
                                 queueList.TryRemove(pair.Key, out Student returnValue);
                                 //heartbeatDic.TryRemove(removedStudent, out int removedValue);
-                                Console.Clear();
+                            //    Console.Clear();                               // < ------------------------COUSES AN ERROR 
                                 Console.WriteLine("-----------------------------------");
                                 Console.WriteLine(removedStudent + " was removed from the queue");
                                 Console.WriteLine("-----------------------------------");
@@ -434,7 +438,7 @@ namespace QueueServerNameSpace{
             foreach (KeyValuePair<string, Supervisor> kvp in supervisorQueue)
             {
                 JObject supervisorObject = new JObject(
-                    new JProperty("name", new JValue(kvp.Key)),
+                    new JProperty("name", new JValue(kvp.Value.getName())),
                     new JProperty("status", new JValue(kvp.Value.getStatus()))
                 );
 
@@ -489,9 +493,12 @@ namespace QueueServerNameSpace{
          public static void setupSupervisorQueueDic(){
             /// everything within these comments are to be removed when the supervisor client can send data instead
             supervisor = new Supervisor("Simon", "Available", "UUID1");
+            supervisor.setHeartbeat(4);
+            supervisor.setSupervising("JP", 1);
             supervisor.setSupervisorMessage("This is a serius message with supervising instructions");
             supervisorQueue[supervisor.getName()] = supervisor;
             supervisor = new Supervisor("Erik", "Available", "UUID2");
+            supervisor.setHeartbeat(4);
             supervisorQueue[supervisor.getName()] = supervisor;
             
             /////////////////////////////////////////////////////////////////////////////////////////////////////////
