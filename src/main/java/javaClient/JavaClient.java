@@ -3,6 +3,7 @@ package javaClient;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -17,6 +18,7 @@ import org.zeromq.ZMQ;
 public class JavaClient {
 
 	private static String undefined = "undefined";
+	protected UUID newUUID = null; 
 	protected String user;
 	protected String serverAddress;
 	protected int inPortNummber;
@@ -201,8 +203,12 @@ public class JavaClient {
 	}
 
 	// places supplied user in the server queue
-	// TODO!!!!!   WE NEED TO CREATE A UID SOMEHOW!!!!!!!!!!!!!!!!!!!!!!
 	private void enterQueue(String user, String address, int outPort) {
+		
+		if(newUUID == null){
+			newUUID = UUID.randomUUID();
+		}
+		 
 
 		try(ZContext context = new ZContext()){
 
@@ -213,7 +219,7 @@ public class JavaClient {
 					System.out.println(e);
 				} 
 				
-			String enterQueue = "{\"enterQueue\": true, \"name\": \""+user+"\", \"clientId\": \"JP\"}";
+			String enterQueue = "{\"enterQueue\": true, \"name\": \""+user+"\", \"clientId\": \""+newUUID+"\"}";
 
 			socket.send(enterQueue.getBytes(ZMQ.CHARSET),0);
 

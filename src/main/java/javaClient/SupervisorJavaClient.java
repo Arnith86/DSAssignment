@@ -1,5 +1,7 @@
 package javaClient;
 
+import java.util.UUID;
+
 import org.zeromq.SocketType;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
@@ -20,15 +22,18 @@ public class SupervisorJavaClient extends JavaClient  {
     
 	@Override
     public void placeInQueue() {
-        // TODO Auto-generated method stub
-            System.out.println("placed in queue");
-            enterSupervisorQueue(super.user, super.serverAddress, super.outPortNummber);
+       
+		enterSupervisorQueue(super.user, super.serverAddress, super.outPortNummber);
     }
 
     // places supplied user in the server queue
 	// TODO!!!!!   WE NEED TO CREATE A UID SOMEHOW!!!!!!!!!!!!!!!!!!!!!!
 	private void enterSupervisorQueue(String user, String address, int outPort) {
-        System.out.println(user+" "+address+" "+outPort);
+       
+		if(newUUID == null){
+			newUUID = UUID.randomUUID();
+		}
+
 		try(ZContext context = new ZContext()){
 
 			ZMQ.Socket socket = context.createSocket(SocketType.REQ);			
@@ -42,7 +47,7 @@ public class SupervisorJavaClient extends JavaClient  {
 			        "                        \"enterSupervisorQueue\": true,\r\n" + 
 			        "                        \"name\": \""+user+"\",\r\n" + 
 			        "                        \"status\": \""+currentSupervisorStatus+"\", \r\n" + 
-			        "                        \"clientId\": \"<unique id string>\"\r\n" + 
+			        "                        \"clientId\": \""+newUUID+"\"\r\n" + 
 			        "                       }";
             //"{\"enterSupervisorQueue\": true, \"name\": \""+user+"\", \"clientId\": \"JP\"}";
                 

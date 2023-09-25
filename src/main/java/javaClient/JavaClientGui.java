@@ -30,6 +30,7 @@ public class JavaClientGui implements ActionListener{
 	private String clientString = "student";
 	private String portError = "PortError"; 
 	private String turn = "turn";
+	private String noAddress = "noAddress";
 	private Boolean notificationSent = false; 
 	private String supervisorStatusInputArray[] = {"pending", "available","occupied"};
 	protected String currentSupervisorStatus="pending";  
@@ -292,7 +293,7 @@ public class JavaClientGui implements ActionListener{
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		
+		 
 		// registers supplied name, and initiates placement in queue
 		if ((e.getSource().equals(sendButton)) || (e.getSource().equals(nameInput))) {
 			
@@ -308,6 +309,8 @@ public class JavaClientGui implements ActionListener{
 					javaClient.setUser(user);
 					javaClient.placeInQueue();
 				}
+			} else {
+				notifications(noAddress);
 			}
 		}
 
@@ -375,8 +378,18 @@ public class JavaClientGui implements ActionListener{
 		if(kind.equals(portError)){
 			JOptionPane.showMessageDialog(
 			null,             
-			"Port numbers cannot contain letters",   
+			"Port numbers cannot contain letters!",   
 			"Port error",   
+			JOptionPane.INFORMATION_MESSAGE
+			);
+			JOptionPane.getRootFrame().setAlwaysOnTop(true);
+		}
+
+		if(kind.equals(noAddress)){
+			JOptionPane.showMessageDialog(
+			null,             
+			"server information must first be supplied!",   
+			"No server address",   
 			JOptionPane.INFORMATION_MESSAGE
 			);
 			JOptionPane.getRootFrame().setAlwaysOnTop(true);
