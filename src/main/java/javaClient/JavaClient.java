@@ -104,8 +104,20 @@ public class JavaClient {
 		queueUpdater.scheduleWithFixedDelay(() -> getCurrentSupervisors(), 0 , 550 , TimeUnit.MILLISECONDS);
 	}
 
+	// creates a hashmap of the supplied JSONObject and returns it
+	private HashMap<String, Object> createObjectHashMap(JSONObject jsonObject){
+		
+		HashMap<String, Object> map = new HashMap<>();
+					Iterator<String> iter2 = jsonObject.keys();
+					while(iter2.hasNext()) {
+						String key = iter2.next();
+						map.put(key, jsonObject.get(key));
+					}
+
+		return map; 
+	}
+
 	// Will display available supervisors
-	// STILL IN TESTING !!!!!!!!!!!!!!!!
 	private Runnable getCurrentSupervisors() {
 	
 		supervisorList = new LinkedList<Supervisors>();
@@ -118,16 +130,8 @@ public class JavaClient {
 
 			// converts Json array elements into Json objects
 			JSONObject supervisor = new JSONObject(jsonMsg.get(i).toString());
-			HashMap<String, Object> map = new HashMap<>();
-			Iterator<String> iter = supervisor.keys();
-
-			// makes a hashmap out of the JSONobject
-			// THIS METHOD SHOULD BE A SINGLE METHOD
-			while(iter.hasNext()) {
-				String key = iter.next();
-				map.put(key, supervisor.get(key));
-			}
-
+			HashMap<String, Object> map = createObjectHashMap(supervisor);
+			
 			String name = (String) map.get("name");
 			String status = (String) map.get("status");
 			Supervisors supervisorsObject = new Supervisors(name, status);
@@ -146,32 +150,21 @@ public class JavaClient {
 				supervisorsObject.setSupervising();
 			}
 
-
-			//System.out.println(supervisorList.toString());
 			supervisorList.add(supervisorsObject);
 
-				// checks if there is a message for the user
-				if((clientObject != null) && (clientObject.getString("name").equals(user))) {
-					
-					String msg2 = subscribe(user);
-					supervisorMsgObject = new JSONObject(msg2);
-					
-					// makes a hashmap out of the JSONobject
-					// THIS METHOD SHOULD BE A SINGLE METHOD
-					HashMap<String, Object> map2 = new HashMap<>();
-					Iterator<String> iter2 = supervisorMsgObject.keys();
-					while(iter2.hasNext()) {
-						String key = iter2.next();
-						map2.put(key, supervisorMsgObject.get(key));
-					}
+			// checks if there is a message for the user
+			if((clientObject != null) && (clientObject.getString("name").equals(user))) {
+				
+				String msg2 = subscribe(user);
+				supervisorMsgObject = new JSONObject(msg2);
+				HashMap<String, Object> map2 = createObjectHashMap(supervisorMsgObject);
 
-					String supervisorMessage = (String) map2.get("message");
-					
-					if (supervisorMessage != null) {
-						supervisorsObject.setSupervisorMessage(supervisorMessage);	 
-					}
-					// supervisorsObject.setSupervisorMessage((String) map2.get("message"));
+				String supervisorMessage = (String) map2.get("message");
+				
+				if (supervisorMessage != null) {
+					supervisorsObject.setSupervisorMessage(supervisorMessage);	 
 				}
+			}
 		}
 
 		gui.setCurrentSupervisors(supervisorList);  	
@@ -192,15 +185,16 @@ public class JavaClient {
 
 				// converts Json array elements into Json objects
 				JSONObject student = new JSONObject(jsonMsg.get(i).toString());
-				HashMap<String, Object> map = new HashMap<>();
-				Iterator<String> iter = student.keys();
+				HashMap<String, Object> map = createObjectHashMap(student);
+				// HashMap<String, Object> map = new HashMap<>();
+				// Iterator<String> iter = student.keys();
 
-				// makes a hashmap out of the JSONobject
-				// THIS METHOD SHOULD BE A SINGLE METHOD
-				while(iter.hasNext()) {
-					String key = iter.next();
-					map.put(key, student.get(key));
-				}
+				// // makes a hashmap out of the JSONobject
+				// // THIS METHOD SHOULD BE A SINGLE METHOD
+				// while(iter.hasNext()) {
+				// 	String key = iter.next();
+				// 	map.put(key, student.get(key));
+				// }
 
 				// extract the value "name" and "ticket" from object and create a new object using that value
 				// these are placed in a linked list.
