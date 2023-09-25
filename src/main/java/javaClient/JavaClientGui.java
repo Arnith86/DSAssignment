@@ -63,11 +63,12 @@ public class JavaClientGui implements ActionListener{
 	private JButton connectButton; 
 
 
- 	JPanel supervisorInputPanel;
+ 	private JPanel supervisorInputPanel;
 	
-	JTextField messageInputField;
-	JButton nextStudentButton;
-	JComboBox<String> supervisorStatusInput;
+	private JTextField messageInputField;
+	private JButton applyMessageButton; 
+	private JButton nextStudentButton;
+	private JComboBox<String> supervisorStatusInput;
 
 
 
@@ -152,11 +153,14 @@ public class JavaClientGui implements ActionListener{
 		if(kindOfClient.equals(supervisorString)){
 			supervisorInputPanel = new JPanel();
 			
-			supervisorStatusInput = new JComboBox<>(supervisorStatusInputArray);		
+			supervisorStatusInput = new JComboBox<>(supervisorStatusInputArray);
+			applyMessageButton = new JButton("Apply");		
 			nextStudentButton = new JButton("Next Student");
+
 			messageInputField = new JTextField("where should the students go?");
 			supervisorInputPanel.add(supervisorStatusInput);
 			supervisorInputPanel.add(messageInputField);
+			supervisorInputPanel.add(applyMessageButton);
 			supervisorInputPanel.add(nextStudentButton);
 			
 		}
@@ -188,7 +192,11 @@ public class JavaClientGui implements ActionListener{
 		applicationFrame.add(inputPanel, BorderLayout.NORTH);
 		applicationFrame.add(centerPanel, BorderLayout.CENTER);
 		// Some more configuration might be needed 
-		applicationFrame.setSize(400, 800);
+		if(kindOfClient.equals(supervisorString)){
+			applicationFrame.setSize(500, 800);
+		} else {
+			applicationFrame.setSize(400, 800);
+		}
 		applicationFrame.setVisible(true);
 		applicationFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
@@ -200,6 +208,7 @@ public class JavaClientGui implements ActionListener{
 			nextStudentButton.addActionListener(this);
 			supervisorStatusInput.addActionListener(this);
 			messageInputField.addActionListener(this);
+			applyMessageButton.addActionListener(this);
 		}
 	}
 
@@ -310,14 +319,14 @@ public class JavaClientGui implements ActionListener{
 			this.serverAddress = addressInput.getText();
 						
 			try {
-				this.inPort = Integer.valueOf(portInInput.getText());    // NEEDS TO BE FAULT TOLARENT !	
+				this.inPort = Integer.valueOf(portInInput.getText()); 	
 			} catch (NumberFormatException ex) {
 				ex.printStackTrace();
 				notifications(portError);
 			} 
 
 			try {
-				this.outPort = Integer.valueOf(portOutInput.getText());    // NEEDS TO BE FAULT TOLARENT !	
+				this.outPort = Integer.valueOf(portOutInput.getText()); 
 			} catch (NumberFormatException ex) {
 				ex.printStackTrace();
 				notifications(portError);
@@ -344,7 +353,7 @@ public class JavaClientGui implements ActionListener{
 			}	
 		}
 
-		if(e.getSource().equals(messageInputField)){
+		if(e.getSource().equals(applyMessageButton) || e.getSource().equals(messageInputField)){
 			if(!user.isBlank()){
 				supervisorJavaClient.registerSupervisorMessage(messageInputField.getText());	
 			}
