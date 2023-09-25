@@ -28,6 +28,8 @@ public class JavaClientGui implements ActionListener{
 	protected String kindOfClient;
 	private String supervisorString = "supervisor";
 	private String clientString = "student";
+	private String portError = "PortError"; 
+	private String turn = "turn";
 	private Boolean notificationSent = false; 
 	private String supervisorStatusInputArray[] = {"pending", "available","occupied"};
 	protected String currentSupervisorStatus="pending";  
@@ -263,15 +265,10 @@ public class JavaClientGui implements ActionListener{
 				if((superervisors.getSupervisorMessage() != null && kindOfClient.equals(clientString))){
 					
 					supervisorMessageLable.setText(superervisors.getSupervisorMessage());
+
 					// notifys student that its his turn
 					if(notificationSent==false){
-						JOptionPane.showMessageDialog(
-							null,             
-							"It's Your Turn Now!",   
-							"notification",   
-							JOptionPane.INFORMATION_MESSAGE
-						);
-						JOptionPane.getRootFrame().setAlwaysOnTop(true);
+						notifications(turn);
 						notificationSent = true;
 					} 
 				}	
@@ -291,7 +288,9 @@ public class JavaClientGui implements ActionListener{
 		if ((e.getSource().equals(sendButton)) || (e.getSource().equals(nameInput))) {
 			
 			if(fullAddressSupplied == true){
-				this.user = nameInput.getText();
+				String gatherdString = nameInput.getText();
+				// Remove trailing spaces
+				this.user = gatherdString.trim().replaceAll("\\s+$", "");
 				
 				if(kindOfClient.equals(supervisorString)){
 					supervisorJavaClient.setUser(user, currentSupervisorStatus);
@@ -300,9 +299,7 @@ public class JavaClientGui implements ActionListener{
 					javaClient.setUser(user);
 					javaClient.placeInQueue();
 				}
-				
 			}
-		
 		}
 
 		// regesters the values for server address and selected ports
@@ -316,12 +313,14 @@ public class JavaClientGui implements ActionListener{
 				this.inPort = Integer.valueOf(portInInput.getText());    // NEEDS TO BE FAULT TOLARENT !	
 			} catch (NumberFormatException ex) {
 				ex.printStackTrace();
-			}
+				notifications(portError);
+			} 
 
 			try {
 				this.outPort = Integer.valueOf(portOutInput.getText());    // NEEDS TO BE FAULT TOLARENT !	
 			} catch (NumberFormatException ex) {
 				ex.printStackTrace();
+				notifications(portError);
 			}
 
 			if(kindOfClient.equals(supervisorString)){
@@ -342,8 +341,7 @@ public class JavaClientGui implements ActionListener{
 		if(e.getSource().equals(supervisorStatusInput)){
 			if(!user.isBlank()){
 				supervisorJavaClient.changeSupervisorStatus(supervisorStatusInput.getSelectedItem().toString());
-			}
-			
+			}	
 		}
 
 		if(e.getSource().equals(messageInputField)){
@@ -352,4 +350,27 @@ public class JavaClientGui implements ActionListener{
 			}
 		}
 	}
+
+	private void notifications(String kind){
+
+		if(kind.equals(turn)){
+			JOptionPane.showMessageDialog(
+				null,             
+				"It's Your Turn Now!",   
+				"notification",   
+				JOptionPane.INFORMATION_MESSAGE
+			);
+			JOptionPane.getRootFrame().setAlwaysOnTop(true);	
+		}			
+		
+		if(kind.equals(portError)){
+			JOptionPane.showMessageDialog(
+			null,             
+			"Port numbers cannot contain letters",   
+			"Port error",   
+			JOptionPane.INFORMATION_MESSAGE
+			);
+			JOptionPane.getRootFrame().setAlwaysOnTop(true);
+		}
+	} 
 }

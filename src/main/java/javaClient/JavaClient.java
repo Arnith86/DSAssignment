@@ -186,19 +186,9 @@ public class JavaClient {
 				// converts Json array elements into Json objects
 				JSONObject student = new JSONObject(jsonMsg.get(i).toString());
 				HashMap<String, Object> map = createObjectHashMap(student);
-				// HashMap<String, Object> map = new HashMap<>();
-				// Iterator<String> iter = student.keys();
-
-				// // makes a hashmap out of the JSONobject
-				// // THIS METHOD SHOULD BE A SINGLE METHOD
-				// while(iter.hasNext()) {
-				// 	String key = iter.next();
-				// 	map.put(key, student.get(key));
-				// }
-
+			
 				// extract the value "name" and "ticket" from object and create a new object using that value
 				// these are placed in a linked list.
-				
 				String name = (String) map.get("name");
 				int ticket = (int) map.get("ticket");
 				Students studentObject = new Students(name, ticket);
@@ -239,11 +229,5 @@ public class JavaClient {
 			// THIS MUST BE TERMINATED WHEN supervisor removes student from list
 			//context.destroy();
 		}
-
 	}
-
-
-
-
-
 }
