@@ -214,7 +214,6 @@ public class JavaClient {
 		
 		if(newUUID == null){
 			newUUID = UUID.randomUUID();
-
 		}
 		 
 

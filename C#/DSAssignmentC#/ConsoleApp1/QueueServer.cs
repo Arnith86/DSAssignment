@@ -14,11 +14,7 @@ namespace QueueServerNameSpace{
     static partial class QueueServer{
 
         static string undefined = "undefined";
-        // Dictionary that hold the queue list
-        // static SortedDictionary<int, string> queueList = new SortedDictionary<int, string>();
         static ConcurrentDictionary <string, Student> queueList = new ConcurrentDictionary<string, Student>();
-        //static ConcurrentDictionary <string, int> heartbeatDic = new ConcurrentDictionary<string, int>();
-        //static Dictionary<string, int> heartbeatDic = new Dictionary<string, int>();
         static Supervisor supervisor;
         static Student student; 
         static ConcurrentDictionary <string, Supervisor> supervisorQueue = new ConcurrentDictionary<string, Supervisor>();
@@ -38,8 +34,6 @@ namespace QueueServerNameSpace{
                     JsonConvert.DeserializeObject<ConcurrentDictionary<string, Student>>
                                          (File.ReadAllText(@"queueListSave.txt"));
 
-                    //heartbeatDic.Clear();
-
                     foreach (KeyValuePair<string, Student> pair in queueList)
                     {
                         queueList[pair.Key].setHeartbeat(4);  //.setHeartbeat = 4;
@@ -51,9 +45,6 @@ namespace QueueServerNameSpace{
             student = new Student("Adam", 2, "UUID4", 400);
             queueList[student.getName()+student.getUUID()] = student;
 
-            // heartbeatDic.Add("One", 40);
-            // heartbeatDic.Add("Two", 400);
-            // heartbeatDic.Add("Three", 400);
             //Console.Clear();       <----------------------------------------/// THIS ROW COUSES ERRORS 
             Console.WriteLine("-----------------------------------");
             Console.WriteLine("");
@@ -73,8 +64,6 @@ namespace QueueServerNameSpace{
             addToListThread.Start();
             Thread countdownThread = new Thread(countdown);        
             countdownThread.Start();
-            // Thread addToSupervisorListThread = new Thread(addToSupervisorList);
-            // addToSupervisorListThread.Start();
 
             using (var pub = new PublisherSocket())
             {
@@ -132,8 +121,6 @@ namespace QueueServerNameSpace{
                         {
                         //    lock (queueList)            //                <-------------- WOULD NOT GET PAST THIS LOCK 
                         //     {
-                            // lock (heartbeatDic)
-                            // {
 
                             Boolean nameIsInList = false;     
                             int newMaxKey;
@@ -155,17 +142,13 @@ namespace QueueServerNameSpace{
                             if(nameIsInList == false)
                                     { student.setIsDouble(false); }
                             else { student.setIsDouble(true); }
-                            
-                            //String keyContent = studentName+UUID; 
+                             
                             queueList[name+UUID] = student;
                             // HERE FOR TESTING REASONS, remove when done 
                             foreach (var kvp in queueList)
                             {
                                 Console.WriteLine("key= "+kvp.Key+" ticket = "+kvp.Value.getTicket()+ " name = "+kvp.Value.getName()+ " UUID: "+kvp.Value.getUUID() );
                             }
-                            //queueList[keyContent].setHeartbeat(100);    /// <-------------------------VALUE CHANGED FOR TESTING should be 4!
-                            //heartbeatDic.AddOrUpdate(studentName, 4, (existingKey, existingValue) => 4);
-                            //heartbeatDic.AddOrUpdate<> (studentName, 4); 
 
                             server.SendFrame("{\"ticket\": " + newMaxKey + ", \"name\": \"" + name + "\"}");
                             //  Console.Clear();                      <---------------- couses an error              
@@ -195,14 +178,13 @@ namespace QueueServerNameSpace{
                             Boolean nameIsInList = false;
                             string supervisorName = jsonObj.name;
                             string isAQueueRequest = jsonObj.enterSupervisorQueue;
-                            //string UUID = jsonObj.UUID;   
                             string status = jsonObj.status;
                             string id = jsonObj.clientId;   // THIS ALSO SHOW THE UUID REMOVE IT LATER
                             
-
                             foreach (var kvp in supervisorQueue)
                             {
-                                if(kvp.Value.getName().Equals(supervisorName)){
+                                if(kvp.Value.getName().Equals(supervisorName))
+                                {
                                     nameIsInList = true; 
                                 }
                             }
@@ -210,36 +192,30 @@ namespace QueueServerNameSpace{
                             if (!supervisorQueue.ContainsKey(supervisorName+UUID) && isAQueueRequest.Equals("True"))
                             {
                                 lock (supervisorQueue)
-                                {
-                                    // lock (heartbeatDic)
-                                    // {                               
-                                        supervisor = new Supervisor(supervisorName, status, UUID, 4);
-                                        supervisorQueue[supervisorName+UUID] = supervisor;
-                                        // HERE FOR TESTING REASONS, remove when done 
-                                        foreach (var kvp in supervisorQueue)
-                                        {
-                                            Console.WriteLine("key= "+kvp.Key+" name = "+kvp.Value.getName()+ " UUID: "+kvp.Value.getUUID() );
-                                        }
-                                        if(nameIsInList == false)
-                                            { supervisor.setIsDouble(false); }
-                                        else { supervisor.setIsDouble(true); }
+                                {                             
+                                    supervisor = new Supervisor(supervisorName, status, UUID, 4);
+                                    supervisorQueue[supervisorName+UUID] = supervisor;
+                                    // HERE FOR TESTING REASONS, remove when done 
+                                    foreach (var kvp in supervisorQueue)
+                                    {
+                                        Console.WriteLine("key= "+kvp.Key+" name = "+kvp.Value.getName()+ " UUID: "+kvp.Value.getUUID() );
+                                    }
+                                    
+                                    if(nameIsInList == false)
+                                        { supervisor.setIsDouble(false); }
+                                    else { supervisor.setIsDouble(true); }
 
-                                        //supervisorQueue[supervisorName+UUID].setHeartbeat(4);
-                                        //heartbeatDic.Add(supervisorName, 4);
-                                        
-                                        server.SendFrame("{\r\n" + 
-                                                "          \"name\": \""+supervisorName+"\",\r\n" + 
-                                                "          \"status\": \""+status+"\", \r\n" + 
-                                                "          }");
+                                    server.SendFrame("{\r\n" + 
+                                            "          \"name\": \""+supervisorName+"\",\r\n" + 
+                                            "          \"status\": \""+status+"\", \r\n" + 
+                                            "          }");
                                 }
                             }
-                        }        // }
-                        else if (/*supervisorQueue.ContainsKey(name)*/jsonObj != null && supervisorQueue.ContainsKey(name+UUID))
+                        }        
+                        else if (jsonObj != null && supervisorQueue.ContainsKey(name+UUID))
                         {
                             lock (supervisorQueue)
                             {
-                            // lock (heartbeatDic)
-                            // {
                                 supervisorQueue[name+UUID].setHeartbeat(4);
                                 server.SendFrame("{}");
                             }
@@ -248,43 +224,22 @@ namespace QueueServerNameSpace{
                         {
                            server.SendFrame("{}");    
                         }
-                
-                    // else if (/*queueList.ContainsKey(studentName+UUID)*/jsonObj != null)
-                    // {
-                        
-                    //     // lock (heartbeatDic)
-                    //     // {
-                    //     // lock(queueList)          //                <-------------- WOULD NOT GET PAST THIS LOCK 
-                    //     // {
-                    //         queueList[studentName+UUID].setHeartbeat(4);
-                    //         server.SendFrame("{}");
-                    //     // }
-                            
-                    //     // }
-                    // }
                     }
                     else if(jsonObj != null && jsonObj.ContainsKey("supervisor") && jsonObj.ContainsKey("message"))
                     {
                         string name = jsonObj.supervisor;
                         string UUID = getSupervisorUUID(name); 
                         string message = jsonObj.message;
-                        
 
-                        /// GET VALUES FOR IF CLAUSE
-                        
-                        
                         if(supervisorQueue.ContainsKey(name+UUID)){
                             
                             lock (supervisorQueue)
                             {
-                                // lock (heartbeatDic) // IS THIS LOOK NEEDED? 
-                                // {
-                                    supervisorQueue[name+UUID].setSupervisorMessage(message);                                        
-                                    server.SendFrame("{\r\n" + 
-                                            "          \"supervisor\": \""+name+"\",\r\n" + 
-                                            "          \"message\": \""+message+"\", \r\n" + 
-                                            "          }");
-                                //}
+                                supervisorQueue[name+UUID].setSupervisorMessage(message);                                        
+                                server.SendFrame("{\r\n" + 
+                                        "          \"supervisor\": \""+name+"\",\r\n" + 
+                                        "          \"message\": \""+message+"\", \r\n" + 
+                                        "          }");
                             }
                         }
                         else
@@ -302,14 +257,12 @@ namespace QueueServerNameSpace{
                             
                             lock (supervisorQueue)
                             {
-                                // lock (heartbeatDic) // IS THIS LOOK NEEDED? 
-                                // {
-                                    supervisorQueue[name+UUID].setStatus(status);                                        
-                                    server.SendFrame("{\r\n" + 
-                                            "          \"supervisor\": \""+name+"\",\r\n" + 
-                                            "          \"status\": \""+status+"\", \r\n" + 
-                                            "          }");
-                                // }
+
+                                supervisorQueue[name+UUID].setStatus(status);                                        
+                                server.SendFrame("{\r\n" + 
+                                        "          \"supervisor\": \""+name+"\",\r\n" + 
+                                        "          \"status\": \""+status+"\", \r\n" + 
+                                        "          }");
                             }
                         }
                         else
@@ -324,7 +277,7 @@ namespace QueueServerNameSpace{
                         
                         if(supervisorQueue.ContainsKey(supervisor+UUID)){
                             
-                            lock(queueList){
+                        //    lock(queueList){                  <<<-------- stops the execution
                                 lock(supervisorQueue){
 
                                     if(queueList.Count > 0 ){
@@ -334,7 +287,7 @@ namespace QueueServerNameSpace{
                                         string studentName = firstElement.Value.getName();
                                         string studentUUID = firstElement.Value.getUUID();
 
-                                        supervisorQueue[supervisor].setSupervising(studentName, studentTicket);
+                                        supervisorQueue[supervisor+UUID].setSupervising(studentName, studentTicket);
                                         
                                         queueList.TryRemove(studentName+studentUUID, out Student removedValue);
                                         // Console.WriteLine(queueList.Count);
@@ -351,7 +304,7 @@ namespace QueueServerNameSpace{
                                         // string studentName = firstElement.Value;
 
                                     }               
-                                }
+                                //}
                             }
 
                             server.SendFrame("{\"supervisor\": \""+supervisor+"\", \"nextStudent\": true}");
