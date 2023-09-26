@@ -16,7 +16,7 @@ public class JavaClientHeartbeatTread {
 	private String serverAddress;
 	private int outPort;
 	
-	
+	// this class supplies the heartbeat to the server, it only sends a single beat per call.
 	public JavaClientHeartbeatTread (String user, String serverAddress, int outPort, UUID UUID){  
 		this.user = user; 
 		this.serverAddress = serverAddress;

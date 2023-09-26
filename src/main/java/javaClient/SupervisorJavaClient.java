@@ -8,9 +8,10 @@ import org.zeromq.SocketType;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
 
-public class SupervisorJavaClient extends JavaClient  {
+// this class is an extension of the JavaClien class, it contains only code related 
+// to the supervisor version of the client
 
-    //private String user;
+public class SupervisorJavaClient extends JavaClient  {
 
     public SupervisorJavaClient(JavaClientGui gui) {
         super(gui);
@@ -22,15 +23,14 @@ public class SupervisorJavaClient extends JavaClient  {
 		currentSupervisorStatus = status; 
 	}
     
-	
+	// places supplied name in the supervisor queue
     public void placeInSupervisorQueue() {
-       
 		enterSupervisorQueue(super.user, super.serverAddress, super.outPortNummber);
     }
 
     // places supplied user in the server queue
 	private void enterSupervisorQueue(String user, String address, int outPort) {
-       
+		
 		if(newUUID == null){
 			newUUID = UUID.randomUUID();
 		}
@@ -39,7 +39,7 @@ public class SupervisorJavaClient extends JavaClient  {
 
 			ZMQ.Socket socket = context.createSocket(SocketType.REQ);			
 			try {
-					socket.connect(/* "tcp://ds.iit.his.se:5557" */  /* "tcp://"+address+":"+outPort*/ "tcp://localhost:5556");
+					socket.connect("tcp://"+address+":"+outPort);
 				} catch (Exception e) {
 					System.out.println(e);
 				} 
@@ -50,16 +50,15 @@ public class SupervisorJavaClient extends JavaClient  {
 			        "                        \"status\": \""+currentSupervisorStatus+"\", \r\n" + 
 			        "                        \"clientId\": \""+newUUID+"\"\r\n" + 
 			        "                       }";
-            //"{\"enterSupervisorQueue\": true, \"name\": \""+user+"\", \"clientId\": \"JP\"}";
                 
 			socket.send(enterSupervisorQueue.getBytes(ZMQ.CHARSET),0);
 
 			byte[] reply = socket.recv(0);
 
-			System.out.println("this was recived: " + new String(reply, ZMQ.CHARSET));  // this should not be written out when application is finished only receive the reply
-
+			System.out.println("this was recived: " + new String(reply, ZMQ.CHARSET));  
+			
+			// makes sure theres only ever one version of the heartbeat thread active at a given time
 			if(heartbeatThread != null && !heartbeatThread.isShutdown()){
-				// cheackAndShutdownThreads(heartbeatThread);
 				heartbeatThread.shutdown(); 
 				heartbeat = new JavaClientHeartbeatTread(user, serverAddress, outPortNummber, newUUID);
 			} else {
@@ -74,17 +73,19 @@ public class SupervisorJavaClient extends JavaClient  {
 		}
 	}
 
+	// this method starts one heartbeat
 	private Runnable heartbeat(JavaClientHeartbeatTread heartbeat){
 		heartbeat.heartbeat();
 		return null; 
 	} 
 
+	// sends the registered supervisor message
 	protected void registerSupervisorMessage(String message){
 		try(ZContext context = new ZContext()){
 
 			ZMQ.Socket socket = context.createSocket(SocketType.REQ);			
 			try {
-					socket.connect(/* "tcp://ds.iit.his.se:5557" */  /* "tcp://"+address+":"+outPort*/ "tcp://localhost:5556");
+					socket.connect("tcp://"+serverAddress+":"+outPortNummber );
 				} catch (Exception e) {
 					System.out.println(e);
 				} 
@@ -98,13 +99,14 @@ public class SupervisorJavaClient extends JavaClient  {
 
 			byte[] reply = socket.recv(0);
 
-			System.out.println("this was recived: " + new String(reply, ZMQ.CHARSET));  // this should not be written out when application is finished only receive the reply
+			System.out.println("this was recived: " + new String(reply, ZMQ.CHARSET)); 
 
 			socket.close();
 			context.close();
 		}
 	}
 
+	// sends the registered change to the supervisors status 
 	protected void changeSupervisorStatus(String status){
 
 		currentSupervisorStatus = status; 
@@ -112,15 +114,11 @@ public class SupervisorJavaClient extends JavaClient  {
 
 			ZMQ.Socket socket = context.createSocket(SocketType.REQ);			
 			try {
-					socket.connect(/* "tcp://ds.iit.his.se:5557" */  /* "tcp://"+address+":"+outPort*/ "tcp://localhost:5556");
+					socket.connect("tcp://"+serverAddress+":"+outPortNummber);
 				} catch (Exception e) {
 					System.out.println(e);
 				} 
-				// {
-				// 	"statusChange": true,
-				// 	"supervisor": "<name>",
-				// 	"status": "<unique id string>"
-				// }
+	
 			String statusChange = 	"{\r\n" + //
 					"\t\"statusChange\": true,\r\n" + //
 					"\t\"supervisor\": \""+user+"\",\r\n" + //
@@ -131,7 +129,7 @@ public class SupervisorJavaClient extends JavaClient  {
 
 			byte[] reply = socket.recv(0);
 
-			System.out.println("this was recived: " + new String(reply, ZMQ.CHARSET));  // this should not be written out when application is finished only receive the reply
+			System.out.println("this was recived: " + new String(reply, ZMQ.CHARSET));  
 
 			socket.close();
 			context.close();
@@ -144,21 +142,18 @@ public class SupervisorJavaClient extends JavaClient  {
 
 			ZMQ.Socket socket = context.createSocket(SocketType.REQ);			
 			try {
-					socket.connect(/* "tcp://ds.iit.his.se:5557" */  /* "tcp://"+address+":"+outPort*/ "tcp://localhost:5556");
+					socket.connect("tcp://"+serverAddress+":"+outPortNummber);
 				} catch (Exception e) {
 					System.out.println(e);
 				} 
-				// {
-				// 	"supervisor": "<name>",
-				// 	"nextStudent": true
-				// }
+
 			String nextStudent = "{\"supervisor\": \""+user+"\", \"nextStudent\": true}";
 
 			socket.send(nextStudent.getBytes(ZMQ.CHARSET),0);
 
 			byte[] reply = socket.recv(0);
 
-			System.out.println("this was recived: " + new String(reply, ZMQ.CHARSET));  // this should not be written out when application is finished only receive the reply
+			System.out.println("this was recived: " + new String(reply, ZMQ.CHARSET));  
 
 			socket.close();
 			context.close();
