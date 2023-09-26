@@ -52,6 +52,10 @@ namespace QueueServerNameSpace{
 		public int getHeartbeat(){
 			return this.heartbeat; 
 		}
+
+		public Boolean getIsDouble(){
+			return this.isDouble;
+		}
 	
 	}
 }

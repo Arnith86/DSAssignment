@@ -76,5 +76,10 @@ namespace QueueServerNameSpace
             return this.heartbeat;
         }
 
+        public Boolean getIsDouble(){
+            return this.isDouble;
+        }
+        
+
     }
 }

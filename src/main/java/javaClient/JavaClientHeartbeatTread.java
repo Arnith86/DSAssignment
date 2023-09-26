@@ -34,8 +34,8 @@ public class JavaClientHeartbeatTread /*implements Runnable*/ {
 	// }
 	
 	protected void /*Runnable*/ heartbeat() {
-		System.out.println("Badump!");
-		System.out.println("user: "+user+" address: "+serverAddress+" outPort: "+outPort);
+		// System.out.println("Badump!");
+		// System.out.println("user: "+user+" address: "+serverAddress+" outPort: "+outPort);
 		String heartBeat = "{\r\n"
 				+ "    \"name\": \""+user+"\",\r\n"
 				+ "    \"clientId\": \""+UUID+"\"\r\n"

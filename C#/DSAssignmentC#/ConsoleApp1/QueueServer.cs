@@ -689,14 +689,18 @@ namespace QueueServerNameSpace{
 
             foreach (KeyValuePair<string, Student> kvp in queueList)
             {
-                JObject supervisorObject = new JObject(
-                    new JProperty("ticket", new JValue(queueList[kvp.Key].getTicket())),
-                    new JProperty("name", new JValue(queueList[kvp.Key].getName()))
-                );
+                if(kvp.Value.getIsDouble() == false){
+                
+                    JObject supervisorObject = new JObject(
+                        new JProperty("ticket", new JValue(queueList[kvp.Key].getTicket())),
+                        new JProperty("name", new JValue(queueList[kvp.Key].getName()))
+                    );
 
-                JObject supervisorsClientObject = new JObject();
+                    JObject supervisorsClientObject = new JObject();
         
-                studentQueueJArray.Add(supervisorObject);
+                    studentQueueJArray.Add(supervisorObject);
+                }
+                
             }
 
             return studentQueueJArray.ToString();
