@@ -230,7 +230,7 @@ public class JavaClientGui implements ActionListener{
 			studentList.forEach(students -> {
 				studentLabel = new JLabel(students.getName());
 				
-				if (students.getName().equals(user)) {
+				if (students.getName().equals(user) && kindOfClient.equals(clientString)) {
 					// Underline the label
 					Font font = studentLabel.getFont();
 					Map attributes = font.getAttributes();
@@ -304,7 +304,7 @@ public class JavaClientGui implements ActionListener{
 				
 				if(kindOfClient.equals(supervisorString)){
 					supervisorJavaClient.setUser(user, currentSupervisorStatus);
-					supervisorJavaClient.placeInQueue();
+					supervisorJavaClient.placeInSupervisorQueue();
 				} else {
 					javaClient.setUser(user);
 					javaClient.placeInQueue();

@@ -1,6 +1,8 @@
 package javaClient;
 
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.zeromq.SocketType;
 import org.zeromq.ZContext;
@@ -20,8 +22,8 @@ public class SupervisorJavaClient extends JavaClient  {
 		currentSupervisorStatus = status; 
 	}
     
-	@Override
-    public void placeInQueue() {
+	
+    public void placeInSupervisorQueue() {
        
 		enterSupervisorQueue(super.user, super.serverAddress, super.outPortNummber);
     }
@@ -37,7 +39,7 @@ public class SupervisorJavaClient extends JavaClient  {
 
 			ZMQ.Socket socket = context.createSocket(SocketType.REQ);			
 			try {
-					socket.connect(/* "tcp://ds.iit.his.se:5557" */  /* "tcp://"+address+":"+outPort*/ "tcp://localhost:5557");
+					socket.connect(/* "tcp://ds.iit.his.se:5557" */  /* "tcp://"+address+":"+outPort*/ "tcp://localhost:5556");
 				} catch (Exception e) {
 					System.out.println(e);
 				} 
@@ -56,23 +58,33 @@ public class SupervisorJavaClient extends JavaClient  {
 
 			System.out.println("this was recived: " + new String(reply, ZMQ.CHARSET));  // this should not be written out when application is finished only receive the reply
 
-			// IN TESTING
-			// JavaClientHeartbeatTread heartbeat = new JavaClientHeartbeatTread(user, address, outPort);
-			// Thread heartbeatThread = new Thread(heartbeat);
-			// heartbeatThread.start();
-			// IN TESTING
-			// THIS MUST BE TERMINATED WHEN supervisor removes student from list
+			if(heartbeatThread != null && !heartbeatThread.isShutdown()){
+				// cheackAndShutdownThreads(heartbeatThread);
+				heartbeatThread.shutdown(); 
+				heartbeat = new JavaClientHeartbeatTread(user, serverAddress, outPortNummber, newUUID);
+			} else {
+				heartbeat = new JavaClientHeartbeatTread(user, serverAddress, outPortNummber, newUUID);
+			}
+			
+			heartbeatThread = Executors.newScheduledThreadPool(1);
+			heartbeatThread.scheduleWithFixedDelay(() -> heartbeat(heartbeat), 0 , 500 , TimeUnit.MILLISECONDS);  
+			
 			socket.close();
 			context.close();
 		}
 	}
+
+	private Runnable heartbeat(JavaClientHeartbeatTread heartbeat){
+		heartbeat.heartbeat();
+		return null; 
+	} 
 
 	protected void registerSupervisorMessage(String message){
 		try(ZContext context = new ZContext()){
 
 			ZMQ.Socket socket = context.createSocket(SocketType.REQ);			
 			try {
-					socket.connect(/* "tcp://ds.iit.his.se:5557" */  /* "tcp://"+address+":"+outPort*/ "tcp://localhost:5557");
+					socket.connect(/* "tcp://ds.iit.his.se:5557" */  /* "tcp://"+address+":"+outPort*/ "tcp://localhost:5556");
 				} catch (Exception e) {
 					System.out.println(e);
 				} 
@@ -100,7 +112,7 @@ public class SupervisorJavaClient extends JavaClient  {
 
 			ZMQ.Socket socket = context.createSocket(SocketType.REQ);			
 			try {
-					socket.connect(/* "tcp://ds.iit.his.se:5557" */  /* "tcp://"+address+":"+outPort*/ "tcp://localhost:5557");
+					socket.connect(/* "tcp://ds.iit.his.se:5557" */  /* "tcp://"+address+":"+outPort*/ "tcp://localhost:5556");
 				} catch (Exception e) {
 					System.out.println(e);
 				} 
@@ -132,7 +144,7 @@ public class SupervisorJavaClient extends JavaClient  {
 
 			ZMQ.Socket socket = context.createSocket(SocketType.REQ);			
 			try {
-					socket.connect(/* "tcp://ds.iit.his.se:5557" */  /* "tcp://"+address+":"+outPort*/ "tcp://localhost:5557");
+					socket.connect(/* "tcp://ds.iit.his.se:5557" */  /* "tcp://"+address+":"+outPort*/ "tcp://localhost:5556");
 				} catch (Exception e) {
 					System.out.println(e);
 				} 

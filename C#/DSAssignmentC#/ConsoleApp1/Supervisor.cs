@@ -14,6 +14,7 @@ namespace QueueServerNameSpace
         private int clientTicket; 
         private string message;
         private int heartbeat; 
+        private Boolean isDouble; 
  
         public Supervisor(string name, string status, string UUID, int heartbeat){
             this.name = name;
@@ -23,7 +24,10 @@ namespace QueueServerNameSpace
             clientName = undefined;    
         }
 
-        // method is still being worked on, supposed to collect client information 
+        public void setIsDouble(Boolean isDouble){
+			this.isDouble = isDouble;
+		}
+         
         public void setSupervising(string clientName, int clientTicket){
             this.clientName = clientName;
             this.clientTicket = clientTicket;
