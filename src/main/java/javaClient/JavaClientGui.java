@@ -19,12 +19,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import org.json.JSONObject;
-
 public class JavaClientGui implements ActionListener{
-	// used for test on  the GUI, should be removed when the implementation is finished
-	
 
+	// variables used during execution 
 	protected String kindOfClient;
 	private String supervisorString = "supervisor";
 	private String clientString = "student";
@@ -38,19 +35,18 @@ public class JavaClientGui implements ActionListener{
 	private static String serverAddress;
 	private static int inPort; 
 	private static int outPort; 
-
 	private Boolean fullAddressSupplied;
 
+	// used to get access to the backend code for the client
 	private JavaClient javaClient;
 	private SupervisorJavaClient supervisorJavaClient; 
-	
-	private JLabel instructionText; 
-	private JLabel availableSupervisors;   
+	 
+  
 	
 	private JFrame applicationFrame;
 	
+	// used in the top part of the gui
 	private JPanel inputPanel;
-
 	private JPanel addressPanel;
 	private JLabel serverLabel; 
 	private JTextField addressInput;
@@ -63,20 +59,19 @@ public class JavaClientGui implements ActionListener{
 	private JTextField portOutInput;
 	private JButton connectButton; 
 
+	private JPanel textInputPanel; 
+	private JTextField nameInput; 
+	private JButton sendButton;
 
+	// used in the supervisor version of the gui 
  	private JPanel supervisorInputPanel;
-	
+	private JLabel availableSupervisors; 	
 	private JTextField messageInputField;
 	private JButton applyMessageButton; 
 	private JButton nextStudentButton;
 	private JComboBox<String> supervisorStatusInput;
 
-
-
-	private JPanel textInputPanel; 
-	private JTextField nameInput; 
-	private JButton sendButton;
-	
+	// used to build the gui
 	private JPanel supervisorsPanel;
 	private JLabel supervisorMessageLable = new JLabel();    
 	
@@ -86,17 +81,19 @@ public class JavaClientGui implements ActionListener{
 	private JPanel newQueueEntry;
 	private JLabel studentLabel;  
 	
+
+	// Gets notified of which version of the client that is used
 	public void setSupervisorClientObject(SupervisorJavaClient supervisorJavaClient){
 		this.supervisorJavaClient = supervisorJavaClient;
 	}
-	
 	public void setClientObject(JavaClient client){
 		this.javaClient = client;
 	}
 	
+	// Builds the GUI 
 	public JavaClientGui (String kindOfClient) {
 
-		fullAddressSupplied = false; // ARE WE USING THIS VARIABLE?
+		fullAddressSupplied = false; 
 		this.kindOfClient = kindOfClient;
 		
 		if(kindOfClient.equals(supervisorString)){
@@ -111,8 +108,6 @@ public class JavaClientGui implements ActionListener{
 		inputPanel = new JPanel(); 
 		inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.Y_AXIS));
 		inputPanel.setBorder(BorderFactory.createLineBorder(Color.black));
-		
-		instructionText = new JLabel("Supply your name and press the send button!");
 		
 		// Panel containing server address and port input fields and apply button
 		addressPanel = new JPanel();
@@ -167,7 +162,6 @@ public class JavaClientGui implements ActionListener{
 		}
 		
 		inputPanel.add(addressPanel);
-		//inputPanel.add(instructionText);
 		inputPanel.add(textInputPanel);
 		if(kindOfClient.equals(supervisorString)){inputPanel.add(supervisorInputPanel);}
 
@@ -187,7 +181,6 @@ public class JavaClientGui implements ActionListener{
 		centerPanel = new JPanel();
 		centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
  		centerPanel.setBorder(BorderFactory.createLineBorder(Color.black));
-		//centerPanel.add(availableSupervisors);
 		
 		// Frame setup
 		applicationFrame.add(inputPanel, BorderLayout.NORTH);
@@ -201,6 +194,7 @@ public class JavaClientGui implements ActionListener{
 		applicationFrame.setVisible(true);
 		applicationFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
+		// actionlistners to varius inputs
 		addressInput.addActionListener(this);
 		sendButton.addActionListener(this);
 		nameInput.addActionListener(this);
@@ -213,7 +207,7 @@ public class JavaClientGui implements ActionListener{
 		}
 	}
 
-
+	// Builds the student queue
 	public void setStudentQueue(LinkedList<Students> studentList){
 		
 		queuePanel.removeAll();
@@ -244,7 +238,6 @@ public class JavaClientGui implements ActionListener{
 			});
 		}
 		
-			
 		centerPanel.add(queuePanel);
 		// this will reprint the applicationFrame for bouth setStudentQueue and setCurrentSupervisors
 		applicationFrame.revalidate(); 
@@ -252,7 +245,7 @@ public class JavaClientGui implements ActionListener{
 	}
 
 	
-
+	// Builds the Supevisor queue, and handles the notification to the students
 	public void setCurrentSupervisors(LinkedList<Supervisors> superervisorList){
 		
 		supervisorsPanel.removeAll();
@@ -294,7 +287,7 @@ public class JavaClientGui implements ActionListener{
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		 
-		// registers supplied name, and initiates placement in queue
+		// registers name, and initiates placement in queue
 		if ((e.getSource().equals(sendButton)) || (e.getSource().equals(nameInput))) {
 			
 			if(fullAddressSupplied == true){
@@ -308,17 +301,17 @@ public class JavaClientGui implements ActionListener{
 				} else {
 					javaClient.setUser(user);
 					javaClient.placeInQueue();
+					this.notificationSent = false;
 				}
 			} else {
 				notifications(noAddress);
 			}
 		}
 
-		// regesters the values for server address and selected ports
+		// regesters the values of the server address and selected ports
 		if ((e.getSource().equals(connectButton)) || (e.getSource().equals(addressInput))) {
 			
-			// THESE INPUTS NEEDS TO BE FAULT TOLARENT !	
-			// IT SHOULD HAVE AN WORKING IF STATEMENT THAT CHECKS THAT ALL INPUTS WERE RECIVED CORRECTLY 
+		
 			this.serverAddress = addressInput.getText();
 						
 			try {
@@ -341,21 +334,24 @@ public class JavaClientGui implements ActionListener{
 					javaClient.setAddressAndPorts(serverAddress, inPort, outPort);
 				}
 			
-			fullAddressSupplied = true; // THE BEFORE MENTIONED IF STATEMENT SHOULD BE TRUE BEFORE THIS IS APPLIED
+			fullAddressSupplied = true;
 		}
 
+		// used to get the next student in the queue
 		if(e.getSource().equals(nextStudentButton)){
 			if(!user.isBlank()){
 				supervisorJavaClient.takeOnAStudent();
 			}
 		}
 		
+		// registers changes to the supervisors status 
 		if(e.getSource().equals(supervisorStatusInput)){
 			if(!user.isBlank()){
 				supervisorJavaClient.changeSupervisorStatus(supervisorStatusInput.getSelectedItem().toString());
 			}	
 		}
 
+		// regesters the currently written supervisor message
 		if(e.getSource().equals(applyMessageButton) || e.getSource().equals(messageInputField)){
 			if(!user.isBlank()){
 				supervisorJavaClient.registerSupervisorMessage(messageInputField.getText());	
@@ -363,6 +359,7 @@ public class JavaClientGui implements ActionListener{
 		}
 	}
 
+	// contains some popup notifications
 	private void notifications(String kind){
 
 		if(kind.equals(turn)){
