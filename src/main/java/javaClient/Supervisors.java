@@ -2,6 +2,7 @@ package javaClient;
 
 import org.json.JSONObject;
 
+// this class is used to keep track of the supervisors values
 public class Supervisors {
 	
 	private String name; 

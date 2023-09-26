@@ -1,4 +1,5 @@
 package javaClient;
+// this class is used to keep track of the student values
 
 public class Students {
 

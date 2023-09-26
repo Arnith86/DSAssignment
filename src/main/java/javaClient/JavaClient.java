@@ -17,6 +17,7 @@ import org.zeromq.ZMQ;
 
 public class JavaClient {
 
+	// variables used in the class
 	private static String undefined = "undefined";
 	protected UUID newUUID = null; 
 	protected String user;
@@ -25,22 +26,23 @@ public class JavaClient {
 	protected int outPortNummber;
 	protected String currentSupervisorStatus;
 
+	// gives access to the gui
 	private JavaClientGui gui;
+	
+	// the used to supply the queues
 	private LinkedList<Students> studentList;
 	private LinkedList<Supervisors> supervisorList;
 
+	// related to the timed execution of events 
 	private ScheduledExecutorService queueUpdater;
 	protected ScheduledExecutorService heartbeatThread;
 	protected JavaClientHeartbeatTread heartbeat; 
-	// protected Thread heartbeatThread; 
 
-
+	// sets upp the client
 	public JavaClient (JavaClientGui gui){
-		// IN TESTING
 		this.gui = gui;
 		queueUpdater = Executors.newScheduledThreadPool(2);
 	}
-
 
 	public void setUser(String user) {
 		this.user=user;
@@ -69,7 +71,6 @@ public class JavaClient {
 
 			try {
 				String subscriberTopic =  new String(subscriber.recv(), ZMQ.CHARSET);	
-			 	//System.out.println("what topic:"+topic);	
 				} catch (Exception e) {	
 			 		System.out.println(e);
 			}
@@ -82,8 +83,9 @@ public class JavaClient {
 		return jsonMsg;
 	}
 
-
+	// Checks if there are active threads, if yes, there shutdown
 	private void cheackAndShutdownThreads(ScheduledExecutorService threadpool){
+
 		ThreadPoolExecutor executor = (ThreadPoolExecutor) threadpool;
 			int activeThreadCount = executor.getActiveCount();
 			System.out.println("active: "+activeThreadCount);
@@ -95,6 +97,8 @@ public class JavaClient {
 			System.out.println("active: "+activeThreadCount);
 	}
 
+	// sets the server related information
+	// also activates the timed events related to updating the queues
 	public void setAddressAndPorts(String address, int inPort, int outPort){
 		
 		serverAddress = address;
@@ -221,7 +225,7 @@ public class JavaClient {
 
 			ZMQ.Socket socket = context.createSocket(SocketType.REQ);			
 			try {
-					socket.connect(/* "tcp://ds.iit.his.se:5556" */  "tcp://"+address+":"+outPort /*"tcp://localhost:5556" */ );
+					socket.connect("tcp://"+address+":"+outPort);
 				} catch (Exception e) {
 					System.out.println(e);
 				} 
@@ -232,12 +236,10 @@ public class JavaClient {
 
 			byte[] reply = socket.recv(0);
 
-			System.out.println("this was recived: " + new String(reply, ZMQ.CHARSET));  // this should not be written out when application is finished only receive the reply
-
-			// IN TESTING
+			System.out.println("this was recived: " + new String(reply, ZMQ.CHARSET));
 			
+			// makes sure that there is only one active version of the heartbeat thread active at a time
 			if(heartbeatThread != null && !heartbeatThread.isShutdown()){
-				// cheackAndShutdownThreads(heartbeatThread);
 				heartbeatThread.shutdown(); 
 				heartbeat = new JavaClientHeartbeatTread(user, serverAddress, outPortNummber, newUUID);
 			} else {
