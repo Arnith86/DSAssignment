@@ -6,16 +6,21 @@ namespace QueueServerNameSpace{
 		private string name; 
 		private int ticket; 
 		private string UUID; 
-		private int heartbeat; 
+		private int heartbeat;
+		private Boolean isDouble; 
 
 		public Student(string student, int ticket, string UUID, int heartbeat)
 		{
 			name = student; 
 			this.ticket = ticket;
 			this.UUID = UUID;
-			this.heartbeat = heartbeat; 
+			this.heartbeat = heartbeat;
+			  
 		}
 
+		public void setIsDouble(Boolean isDouble){
+			this.isDouble = isDouble;
+		}
 		public void setHeartbeat(int heartbeat){
 			this.heartbeat = heartbeat;
 		}

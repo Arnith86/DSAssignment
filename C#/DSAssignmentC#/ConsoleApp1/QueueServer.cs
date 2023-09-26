@@ -120,21 +120,37 @@ namespace QueueServerNameSpace{
                     dynamic jsonObj = JsonConvert.DeserializeObject(msg);
                     string studentName = jsonObj.name;
                     string UUID = jsonObj.clientId;
-                    
-                    if (!queueList.ContainsKey(studentName+UUID) && jsonObj != null && jsonObj.ContainsKey("enterQueue"))
+
+                    if ( jsonObj != null && jsonObj.ContainsKey("name") && jsonObj.ContainsKey("clientId"))
                     {
-                    //    lock (queueList)            //                <-------------- WOULD NOT GET PAST THIS LOCK 
-                    //     {
+                        if (!queueList.ContainsKey(studentName+UUID) && jsonObj != null && jsonObj.ContainsKey("enterQueue"))
+                        {
+                        //    lock (queueList)            //                <-------------- WOULD NOT GET PAST THIS LOCK 
+                        //     {
                             // lock (heartbeatDic)
                             // {
-                                int newMaxKey;
-                                
-                                if(queueList.Count() > 0 ){
+
+                            Boolean nameIsInList = false;     
+                            int newMaxKey;
+                            foreach (var kvp in queueList)
+                            {
+                                if(kvp.Value.getName().Equals(studentName)){
+                                    nameIsInList = true; 
+                                }
+                            }
+
+                                if(queueList.Count() > 0 )
+                                {
                                     var maxKey = queueList.Count;
                                     newMaxKey = maxKey + 1;   
                                 } else { newMaxKey = 1; }
 
                                 Student student = new Student(studentName, newMaxKey, UUID, 4);
+
+                                if(nameIsInList == false)
+                                     { student.setIsDouble(false); }
+                                else { student.setIsDouble(true); }
+                                
                                 //String keyContent = studentName+UUID; 
                                 queueList[studentName+UUID] = student;
                                 foreach (var kvp in queueList)
@@ -159,19 +175,24 @@ namespace QueueServerNameSpace{
                                 File.WriteAllText(@".\queueListSave.txt", json);
                             // }
                         // }
-                    }
-                    else if (queueList.ContainsKey(studentName+UUID))
-                    {
-                        // lock (heartbeatDic)
-                        // {
-                        // lock(queueList)          //                <-------------- WOULD NOT GET PAST THIS LOCK 
-                        // {
+                        } else {
                             queueList[studentName+UUID].setHeartbeat(4);
                             server.SendFrame("{}");
-                        // }
-                            
-                        // }
+                        }
                     }
+                    // else if (/*queueList.ContainsKey(studentName+UUID)*/jsonObj != null)
+                    // {
+                        
+                    //     // lock (heartbeatDic)
+                    //     // {
+                    //     // lock(queueList)          //                <-------------- WOULD NOT GET PAST THIS LOCK 
+                    //     // {
+                    //         queueList[studentName+UUID].setHeartbeat(4);
+                    //         server.SendFrame("{}");
+                    //     // }
+                            
+                    //     // }
+                    // }
                     else
                     {
                         server.SendFrame("{}");
