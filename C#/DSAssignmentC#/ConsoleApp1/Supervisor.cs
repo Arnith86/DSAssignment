@@ -15,10 +15,11 @@ namespace QueueServerNameSpace
         private string message;
         private int heartbeat; 
  
-        public Supervisor(string name, string status, string UUID){
+        public Supervisor(string name, string status, string UUID, int heartbeat){
             this.name = name;
             this.status = status;
             this.UUID = UUID; 
+            this.heartbeat = heartbeat;
             clientName = undefined;    
         }
 

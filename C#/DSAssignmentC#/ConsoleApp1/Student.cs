@@ -8,11 +8,12 @@ namespace QueueServerNameSpace{
 		private string UUID; 
 		private int heartbeat; 
 
-		public Student(string student, int ticket, string UUID)
+		public Student(string student, int ticket, string UUID, int heartbeat)
 		{
 			name = student; 
 			this.ticket = ticket;
-			this.UUID = UUID; 
+			this.UUID = UUID;
+			this.heartbeat = heartbeat; 
 		}
 
 		public void setHeartbeat(int heartbeat){

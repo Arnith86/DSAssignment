@@ -45,11 +45,9 @@ namespace QueueServerNameSpace{
                     }
                 // }
             }
-            student = new Student("JP", 1, "UUID3");
-            student.setHeartbeat(400);
+            student = new Student("JP", 1, "UUID3", 400);
             queueList[student.getName()+student.getUUID()] = student;
-            student = new Student("Adam", 2, "UUID4");
-            student.setHeartbeat(400);
+            student = new Student("Adam", 2, "UUID4", 400);
             queueList[student.getName()+student.getUUID()] = student;
 
             // heartbeatDic.Add("One", 40);
@@ -125,8 +123,8 @@ namespace QueueServerNameSpace{
                     
                     if (!queueList.ContainsKey(studentName+UUID) && jsonObj != null && jsonObj.ContainsKey("enterQueue"))
                     {
-                    //    lock (queueList)                            <-------------- STOPS EXECUTION :C:C
-                        {
+                    //    lock (queueList)            //                <-------------- WOULD NOT GET PAST THIS LOCK 
+                    //     {
                             // lock (heartbeatDic)
                             // {
                                 int newMaxKey;
@@ -136,36 +134,41 @@ namespace QueueServerNameSpace{
                                     newMaxKey = maxKey + 1;   
                                 } else { newMaxKey = 1; }
 
-                                Student student = new Student(studentName, newMaxKey, UUID);
-                                
+                                Student student = new Student(studentName, newMaxKey, UUID, 4);
+                                //String keyContent = studentName+UUID; 
                                 queueList[studentName+UUID] = student;
-                                queueList[studentName+UUID].setHeartbeat(4);
+                                foreach (var kvp in queueList)
+                                {
+                                    Console.WriteLine("key= "+kvp.Key+" ticket = "+kvp.Value.getTicket()+ " name = "+kvp.Value.getName()+ " UUID: "+kvp.Value.getUUID() );
+                                }
+                                //queueList[keyContent].setHeartbeat(100);    /// <-------------------------VALUE CHANGED FOR TESTING should be 4!
                                 //heartbeatDic.AddOrUpdate(studentName, 4, (existingKey, existingValue) => 4);
                                 //heartbeatDic.AddOrUpdate<> (studentName, 4); 
 
                                 server.SendFrame("{\"ticket\": " + newMaxKey + ", \"name\": \"" + studentName + "\"}");
-                                Console.Clear();
+                              //  Console.Clear();                      <---------------- couses an error              
                                 Console.WriteLine("-----------------------------------");
                                 Console.WriteLine(studentName + " was added to the queue");
                                 Console.WriteLine("-----------------------------------");
                                 foreach (var kvp in queueList)
                                 {
-                                    Console.WriteLine("ticket = {0}, name = {1}", kvp.Key, kvp.Value);
+                                    Console.WriteLine("ticket = "+kvp.Value.getTicket()+" name = "+kvp.Value.getName());
                                 }
                                 Console.WriteLine("-----------------------------------");
                                 string json = JsonConvert.SerializeObject(queueList);
                                 File.WriteAllText(@".\queueListSave.txt", json);
                             // }
-                        }
+                        // }
                     }
                     else if (queueList.ContainsKey(studentName+UUID))
                     {
                         // lock (heartbeatDic)
                         // {
-                        lock(queueList){
+                        // lock(queueList)          //                <-------------- WOULD NOT GET PAST THIS LOCK 
+                        // {
                             queueList[studentName+UUID].setHeartbeat(4);
                             server.SendFrame("{}");
-                        }
+                        // }
                             
                         // }
                     }
@@ -211,10 +214,10 @@ namespace QueueServerNameSpace{
     
                                 // lock (heartbeatDic)
                                 // {
-                                    supervisor = new Supervisor(supervisorName, status, UUID);
+                                    supervisor = new Supervisor(supervisorName, status, UUID, 4);
                                     supervisorQueue[supervisorName] = supervisor;
 
-                                    supervisorQueue[supervisorName+UUID].setHeartbeat(4);
+                                    //supervisorQueue[supervisorName+UUID].setHeartbeat(4);
                                     //heartbeatDic.Add(supervisorName, 4);
                                     
                                     server.SendFrame("{\r\n" + 
@@ -492,12 +495,12 @@ namespace QueueServerNameSpace{
 
          public static void setupSupervisorQueueDic(){
             /// everything within these comments are to be removed when the supervisor client can send data instead
-            supervisor = new Supervisor("Simon", "Available", "UUID1");
+            supervisor = new Supervisor("Simon", "Available", "UUID1", 400);
             supervisor.setHeartbeat(4);
             supervisor.setSupervising("JP", 1);
             supervisor.setSupervisorMessage("This is a serius message with supervising instructions");
             supervisorQueue[supervisor.getName()] = supervisor;
-            supervisor = new Supervisor("Erik", "Available", "UUID2");
+            supervisor = new Supervisor("Erik", "Available", "UUID2", 400);
             supervisor.setHeartbeat(4);
             supervisorQueue[supervisor.getName()] = supervisor;
             
