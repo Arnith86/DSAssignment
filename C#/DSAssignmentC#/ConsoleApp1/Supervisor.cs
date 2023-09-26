@@ -1,7 +1,7 @@
 using System.Dynamic;
 using System.Net;
-using Newtonsoft.Json.Schema;
 
+// this class is used to keep track of supervisor values in the queue 
 namespace QueueServerNameSpace
 {
     public class Supervisor{

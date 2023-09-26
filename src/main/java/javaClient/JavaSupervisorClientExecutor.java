@@ -1,5 +1,5 @@
 package javaClient;
-
+// used to execute the Supervisor version of the Java Client
 public class JavaSupervisorClientExecutor {
     	public static void main(String[] args) {
 

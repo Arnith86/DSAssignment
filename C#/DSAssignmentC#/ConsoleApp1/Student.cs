@@ -1,5 +1,5 @@
 ﻿using System;
-
+// this class is used to keep track of student values in the queue
 namespace QueueServerNameSpace{
 	public class Student
 	{
