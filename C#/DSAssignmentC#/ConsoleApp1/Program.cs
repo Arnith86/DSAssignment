@@ -3,4 +3,4 @@ using QueueServerNameSpace;
 
 //QueueServer.addToList();
 //QueueServer.sendList();
-QueueServer.setupSupervisorQueueDic();
+QueueServer.sendList();

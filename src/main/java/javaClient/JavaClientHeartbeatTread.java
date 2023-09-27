@@ -38,6 +38,8 @@ public class JavaClientHeartbeatTread {
 			ZMQ.Socket socket = context.createSocket(SocketType.REQ); 
 			socket.connect("tcp://"+serverAddress+":"+outPort );
 			socket.send(heartBeat.getBytes(ZMQ.CHARSET),0);
+
+			// keeps track of changes in current connection 
 			ZMQ.Poller poller = context.createPoller(1);
 	        poller.register(socket, ZMQ.Poller.POLLIN);
 	        int rc = -1;
