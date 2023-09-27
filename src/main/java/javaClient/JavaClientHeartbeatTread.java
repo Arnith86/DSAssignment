@@ -15,17 +15,19 @@ public class JavaClientHeartbeatTread {
 	private UUID UUID; 
 	private String serverAddress;
 	private int outPort;
+	private JavaClient javaClient;
 	
 	// this class supplies the heartbeat to the server, it only sends a single beat per call.
-	public JavaClientHeartbeatTread (String user, String serverAddress, int outPort, UUID UUID){  
+	public JavaClientHeartbeatTread (String user, String serverAddress, int outPort, UUID UUID, JavaClient javaClient){  
 		this.user = user; 
 		this.serverAddress = serverAddress;
 		this.outPort = outPort;
-		this.UUID = UUID; 
+		this.UUID = UUID;
+		this.javaClient = javaClient; 
 	}
 	
 	protected void heartbeat() {
-
+		
 		String heartBeat = "{\r\n"
 				+ "    \"name\": \""+user+"\",\r\n"
 				+ "    \"clientId\": \""+UUID+"\"\r\n"

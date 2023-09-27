@@ -192,8 +192,9 @@ public class JavaClient {
 		String msg = subscribe("queue");
 		JSONArray jsonMsg = new JSONArray(msg);
 
-		// extracts the String value name from json objects housed in the jsonarray
+		// makes sure that the string is not empty 
 		if(!msg.equals("[{}]")){
+			// extracts the String value name from json objects housed in the jsonarray
 			for (int i = 0; i < jsonMsg.length(); i++) {
 
 				// converts Json array elements into Json objects
@@ -241,9 +242,9 @@ public class JavaClient {
 			// makes sure that there is only one active version of the heartbeat thread active at a time
 			if(heartbeatThread != null && !heartbeatThread.isShutdown()){
 				heartbeatThread.shutdown(); 
-				heartbeat = new JavaClientHeartbeatTread(user, serverAddress, outPortNummber, newUUID);
+				heartbeat = new JavaClientHeartbeatTread(user, serverAddress, outPortNummber, newUUID, this);
 			} else {
-				heartbeat = new JavaClientHeartbeatTread(user, serverAddress, outPortNummber, newUUID);
+				heartbeat = new JavaClientHeartbeatTread(user, serverAddress, outPortNummber, newUUID, this);
 			}
 			
 			heartbeatThread = Executors.newScheduledThreadPool(1);
@@ -253,7 +254,9 @@ public class JavaClient {
 			context.close();
 		}
 	}
-
+	public void testtest(){
+		System.out.println("I got the message from : ");
+	}
 	private Runnable heartbeat(JavaClientHeartbeatTread heartbeat){
 		heartbeat.heartbeat();
 		return null; 

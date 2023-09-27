@@ -60,9 +60,9 @@ public class SupervisorJavaClient extends JavaClient  {
 			// makes sure theres only ever one version of the heartbeat thread active at a given time
 			if(heartbeatThread != null && !heartbeatThread.isShutdown()){
 				heartbeatThread.shutdown(); 
-				heartbeat = new JavaClientHeartbeatTread(user, serverAddress, outPortNummber, newUUID);
+				heartbeat = new JavaClientHeartbeatTread(user, serverAddress, outPortNummber, newUUID, this);
 			} else {
-				heartbeat = new JavaClientHeartbeatTread(user, serverAddress, outPortNummber, newUUID);
+				heartbeat = new JavaClientHeartbeatTread(user, serverAddress, outPortNummber, newUUID, this);
 			}
 			
 			heartbeatThread = Executors.newScheduledThreadPool(1);

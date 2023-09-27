@@ -78,7 +78,7 @@ namespace QueueServerNameSpace{
             queueList[student.getName()+student.getUUID()] = student;
             student = new Student("Adam", 2, "UUID4", 400);
             queueList[student.getName()+student.getUUID()] = student;
-            string json = JsonConvert.SerializeObject(queueList);*/
+            string json = JsonConvert.SerializeObject(queueList);
             //student = new Student("null-man", 1, "UUIDNull", 400000);                   // THESE ARE TO BE REMOVED AFTER TESTING IS COMPLEATED 
             //queueList[student.getName() + student.getUUID()] = student;
 
@@ -105,7 +105,7 @@ namespace QueueServerNameSpace{
                 addToListThread.Start();
                 // activates the thread that counts down the current heartbeat values 
                 Thread countdownThread = new Thread(countdown);
-                countdownThread.Start();
+                countdownThread.Start(); 
 
                 // starts the loop of publeshing the topic "queue", "supervisors" "<specific username>"
             
@@ -114,8 +114,8 @@ namespace QueueServerNameSpace{
                 pub.Bind("tcp://*:5555");
                 while (true)
                 {
-                    lock (queueList)   // <<-------------------------- WOULD NOT GET PAST THIS LOCK 
-                     {
+                    lock (queueList)
+                    {
                         // Publishes the student queue
                         pub.SendMoreFrame("queue").SendFrame(sendStudentList());
                         // Publishes the supervisor queue
@@ -142,7 +142,7 @@ namespace QueueServerNameSpace{
         }
 
         // This method listens to requests to the server 
-        public static void checkRequests()
+             public static void checkRequests()
         {
             using (var server = new ResponseSocket())
             {
@@ -164,53 +164,39 @@ namespace QueueServerNameSpace{
                         // makes sure that the combination of name+UUID does not exist in the queue 
                         if (!queueList.ContainsKey(name+UUID) && jsonObj != null && jsonObj.ContainsKey("enterQueue"))
                         {
-                            lock (queueList)            //                <-------------- WOULD NOT GET PAST THIS LOCK 
+                            lock (queueList)          
                             {
 
-                                Boolean nameIsInList = false;
+                                Boolean nameIsInList = false;     
                                 int newMaxKey;
 
-
-                                // checks to see if the suplied name already is in the queue
-                                foreach (var kvp in queueList)
+                                // checks to see if the supplied name already is in the queue
+                                foreach (var kvp in queueList.OrderBy(tic => tic.Value.getTicket()))
                                 {
-                                    if (kvp.Value.getName().Equals(name))
-                                    {
-                                        nameIsInList = true;
+                                    if(kvp.Value.getName().Equals(name)){
+                                        nameIsInList = true; 
                                     }
-
-
                                 }
-
-
+                                
                                 // gets the highest index in the queue
-                                if (queueList.Count() > 0)
+                                if(queueList.Count() > 0 )
                                 {
-
-                                    foreach (var kvp in queueList.OrderBy(tic => tic.Value.getTicket()))
-                                    {
-                                        biggestTicket = kvp.Value.getTicket();
-
-                                        biggestTicket++;
-                                    }
-
-                                    newMaxKey = biggestTicket;
-                                }
-                                else { newMaxKey = 1; }
-
+                                    var maxKey = queueList.Count;
+                                    newMaxKey = maxKey + 1;   
+                                } else { newMaxKey = 1; }
 
                                 Student student = new Student(name, newMaxKey, UUID, 4);
 
                                 // specifys if the new entrie already has its supplied name in the queue
-                                if (nameIsInList == false)
-                                { student.setIsDouble(false); }
+                                if(nameIsInList == false)
+                                        { student.setIsDouble(false); }
                                 else { student.setIsDouble(true); }
-
-                                queueList[name + UUID] = student;
+                                
+                                queueList[name+UUID] = student;
                                 // HERE FOR TESTING REASONS, remove when done 
                                 foreach (var kvp in queueList.OrderBy(tic => tic.Value.getTicket()))
                                 {
-                                    Console.WriteLine("key= " + kvp.Key + " ticket = " + kvp.Value.getTicket() + " name = " + kvp.Value.getName() + " UUID: " + kvp.Value.getUUID());
+                                    Console.WriteLine("key= "+kvp.Key+" ticket = "+kvp.Value.getTicket()+ " name = "+kvp.Value.getName()+ " UUID: "+kvp.Value.getUUID() );
 
                                 }
 
@@ -219,23 +205,24 @@ namespace QueueServerNameSpace{
                                 Console.WriteLine("-----------------------------------");
                                 Console.WriteLine(name + " was added to the queue");
                                 Console.WriteLine("-----------------------------------");
-                                foreach (var kvp in queueList.OrderBy(tic => tic.Value.getTicket()))
+                                foreach (var kvp in queueList)
                                 {
-                                    Console.WriteLine("ticket = " + kvp.Value.getTicket() + " name = " + kvp.Value.getName());
+                                    Console.WriteLine("ticket = "+kvp.Value.getTicket()+" name = "+kvp.Value.getName());
                                 }
                                 Console.WriteLine("-----------------------------------");
-                                saveCurrentLists();
+                                string json = JsonConvert.SerializeObject(queueList);
+                                try
+                                {
+                                    File.WriteAllText(@".\queueListSave.txt", json);
+                                }
+                                catch
+                                {
+                                    File.WriteAllText(@"..\..\..\queueListSave.txt", json);
+                                }
                             }
-                            // }
 
                         }
-                        // updates the heartbeat value  
-                        else if (jsonObj != null && queueList.ContainsKey(name+UUID))
-                        {
-                            queueList[name+UUID].setHeartbeat(4);
-                            server.SendFrame("{}");
-                        }
-                        // performs entries to the supervisorQueue, or updates the heartbeat value 
+                        // performs entries on the student queue, or updates the heartbeat value
                         else if (jsonObj !=null && jsonObj.ContainsKey("enterSupervisorQueue"))
                         {
                             Boolean nameIsInList = false;
@@ -257,7 +244,7 @@ namespace QueueServerNameSpace{
                             {
                                 lock (supervisorQueue)
                                 {                             
-                                    supervisor = new Supervisor(supervisorName, status, UUID, 4);
+                                    supervisor = new Supervisor(supervisorName, status, UUID, 400);      /// <<<<<---- heartbeat MUST BE RESET TO 4 after testing
                                     supervisorQueue[supervisorName+UUID] = supervisor;
                                     // HERE FOR TESTING REASONS, remove when done 
                                     foreach (var kvp in supervisorQueue)
@@ -275,21 +262,33 @@ namespace QueueServerNameSpace{
                                             "          }");
                                 }
                             }
-                        } 
-                        // updates the heartbeat value          
-                        else if (jsonObj != null && supervisorQueue.ContainsKey(name+UUID))
-                        {
-                            lock (supervisorQueue)
+                        }
+                        // updates the heartbeat value for both students and supervisors 
+                        else 
+                        {       
+                            if(queueList.ContainsKey(name+UUID)){
+                                lock(queueList){
+                                    queueList[name+UUID].setHeartbeat(4);
+                                    server.SendFrame("{}");
+                                }
+                                
+                            }
+                            else if(supervisorQueue.ContainsKey(name+UUID))
                             {
-                                supervisorQueue[name+UUID].setHeartbeat(4);
+                                lock (supervisorQueue)
+                                {
+                                    supervisorQueue[name+UUID].setHeartbeat(4);
+                                    server.SendFrame("{}");
+                                } 
+                            }
+                                else 
+                            {
                                 server.SendFrame("{}");
                             }
+                        
                         }
-                        else
-                        {
-                           server.SendFrame("{}");    
-                        }
-                    }
+                    } 
+
                     // updates the supervisors message
                     else if(jsonObj != null && jsonObj.ContainsKey("supervisor") && jsonObj.ContainsKey("message"))
                     {
@@ -358,9 +357,8 @@ namespace QueueServerNameSpace{
                                     
                                     queueList.TryRemove(studentName+studentUUID, out Student removedValue);
 
-                                        //QueueServer.saveCurrentLists();
-                                        
-                                    }               
+                                   QueueServer.saveCurrentLists();
+                                }               
                                 }
                             }
 
