@@ -22,27 +22,33 @@ namespace QueueServerNameSpace{
             try
             {
                 dynamic jsonObj = JsonConvert.DeserializeObject(File.ReadAllText(@"..\..\..\queueListSave.txt"));
-                for (int i = 0; i < jsonObj.Count; i++)
+                if (jsonObj.count != null)
                 {
-                    string name = jsonObj[i].name;
-                    int tickets = jsonObj[i].ticket;
-                    string UUID = jsonObj[i].UUID;
-                    int heartbeat = jsonObj[i].heartbeat;
-                    student = new Student(name, tickets, UUID, heartbeat);                   // THESE ARE TO BE REMOVED AFTER TESTING IS COMPLEATED 
-                    queueList[student.getName() + student.getUUID()] = student;
+                    for (int i = 0; i < jsonObj.Count; i++)
+                    {
+                        string name = jsonObj[i].name;
+                        int tickets = jsonObj[i].ticket;
+                        string UUID = jsonObj[i].UUID;
+                        int heartbeat = jsonObj[i].heartbeat;
+                        student = new Student(name, tickets, UUID, heartbeat);                   // THESE ARE TO BE REMOVED AFTER TESTING IS COMPLEATED 
+                        queueList[student.getName() + student.getUUID()] = student;
+                    }
                 }
             }
             catch
             {
                 dynamic jsonObj = JsonConvert.DeserializeObject(File.ReadAllText(@".\queueListSave.txt"));
-                for (int i = 0; i < jsonObj.Count; i++)
+                if (jsonObj.Count != null)
                 {
-                    string name = jsonObj[i].name;
-                    int tickets = jsonObj[i].ticket;
-                    string UUID = jsonObj[i].UUID;
-                    int heartbeat = jsonObj[i].heartbeat;
-                    student = new Student(name, tickets, UUID, heartbeat);                   // THESE ARE TO BE REMOVED AFTER TESTING IS COMPLEATED 
-                    queueList[student.getName() + student.getUUID()] = student;
+                    for (int i = 0; i < jsonObj.Count; i++)
+                    {
+                        string name = jsonObj[i].name;
+                        int tickets = jsonObj[i].ticket;
+                        string UUID = jsonObj[i].UUID;
+                        int heartbeat = jsonObj[i].heartbeat;
+                        student = new Student(name, tickets, UUID, heartbeat);                   // THESE ARE TO BE REMOVED AFTER TESTING IS COMPLEATED 
+                        queueList[student.getName() + student.getUUID()] = student;
+                    }
                 }
             }
 
