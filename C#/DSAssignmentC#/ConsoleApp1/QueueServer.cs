@@ -566,40 +566,19 @@ namespace QueueServerNameSpace{
         public static void saveCurrentLists()
         {
            
-            OrderedDictionary orderedDictionary = new OrderedDictionary();
-            /*foreach (var item in sortList.Select((i, Value.getTicket) => new {i, Value.getTicket}))
-             {
-
-                 var p = item.Value.getTicket();
-
-                 var index = item.i;
-                 var currentStudent = sortList.ElementAt(index);
-                 Console.WriteLine(index+":"+currentStudent+":"+p);
-                 //queueList = sortList;
-             }*/
             
-            
-            // used to load the current state of the server.
-            // The try catch exist due to how diffrent programs read files.
-            //visual studio and visual studio code search for the files in diffrent places.
             string jsons = JsonConvert.SerializeObject(supervisor);
-            try
-            {
-                File.WriteAllText(@".\supervisorSave.txt", jsons);
-            }
-            catch
-            {
-                File.WriteAllText(@"..\..\..\supervisorSave.txt", jsons);
-            }
+            
+            File.WriteAllText(@".\supervisorSave.txt", jsons);
+            File.WriteAllText(@"..\..\..\supervisorSave.txt", jsons);
+            
+            
             string json = JsonConvert.SerializeObject(queueList);
-            try
-            {
-                File.WriteAllText(@"..\..\..\queueListSave.txt", json);
-            }
-            catch
-            {
-                File.WriteAllText(@"..\..\..\queueListSave.txt", json);
-            }
+            
+            File.WriteAllText(@".\queueListSave.txt", json);
+            File.WriteAllText(@"..\..\..\queueListSave.txt", json);
+            
+            
         }
     }
 }
