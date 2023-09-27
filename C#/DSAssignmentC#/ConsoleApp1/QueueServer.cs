@@ -343,15 +343,24 @@ namespace QueueServerNameSpace{
                         
                         if(supervisorQueue.ContainsKey(supervisor+UUID)){
                             
-                           lock(queueList){                  //<<<-------- stops the execution
+                           lock(queueList){                  
                             lock(supervisorQueue){
 
                                 if(queueList.Count > 0 ){
-                                    
+
                                     KeyValuePair<string, Student> firstElement = queueList.First();
                                     int studentTicket = firstElement.Value.getTicket();
                                     string studentName = firstElement.Value.getName();
                                     string studentUUID = firstElement.Value.getUUID();
+
+                                    foreach (var kvp in queueList)
+                                    {
+                                        if(kvp.Value.getTicket() < studentTicket){
+                                            studentTicket = kvp.Value.getTicket();
+                                            studentName = kvp.Value.getName();
+                                            studentUUID = kvp.Value.getUUID();
+                                        }
+                                    }
 
                                     supervisorQueue[supervisor+UUID].setSupervising(studentName, studentTicket);
                                     
