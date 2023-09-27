@@ -107,8 +107,8 @@ namespace QueueServerNameSpace{
                 Thread countdownThread = new Thread(countdown);
                 countdownThread.Start(); 
 
-                // starts the loop of publeshing the topic "queue", "supervisors" "<specific username>"
-            
+               
+            // starts the loop of publeshing the topic "queue", "supervisors" "<specific username>"
             using (var pub = new PublisherSocket())
             {
                 pub.Bind("tcp://*:5555");
@@ -142,7 +142,7 @@ namespace QueueServerNameSpace{
         }
 
         // This method listens to requests to the server 
-             public static void checkRequests()
+        public static void checkRequests()
         {
             using (var server = new ResponseSocket())
             {
@@ -159,7 +159,6 @@ namespace QueueServerNameSpace{
                         string name = jsonObj.name;
                         string UUID = jsonObj.clientId;
 
-        
                         // performs entries on the student queue, or updates the heartbeat value
                         // makes sure that the combination of name+UUID does not exist in the queue 
                         if (!queueList.ContainsKey(name+UUID) && jsonObj != null && jsonObj.ContainsKey("enterQueue"))
@@ -244,7 +243,7 @@ namespace QueueServerNameSpace{
                             {
                                 lock (supervisorQueue)
                                 {                             
-                                    supervisor = new Supervisor(supervisorName, status, UUID, 400);      /// <<<<<---- heartbeat MUST BE RESET TO 4 after testing
+                                    supervisor = new Supervisor(supervisorName, status, UUID, 4);      
                                     supervisorQueue[supervisorName+UUID] = supervisor;
                                     // HERE FOR TESTING REASONS, remove when done 
                                     foreach (var kvp in supervisorQueue)
@@ -364,7 +363,13 @@ namespace QueueServerNameSpace{
 
                                     supervisorQueue[supervisor+UUID].setSupervising(studentName, studentTicket);
                                     
-                                    queueList.TryRemove(studentName+studentUUID, out Student removedValue);
+                                    foreach (var kvp in queueList)
+                                    {
+                                        if(kvp.Value.getName().Equals(studentName)){
+                                           queueList.TryRemove(kvp.Key, out Student removedValue);
+                                        }
+                                    }
+                                    //queueList.TryRemove(studentName+studentUUID, out Student removedValue);
 
                                    QueueServer.saveCurrentLists();
                                 }               
