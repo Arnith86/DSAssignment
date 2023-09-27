@@ -1,1 +1,1 @@
-[{"clientID":"ErikUUID2","clientName":"undefined","clientTicket":0,"name":"Erik","status":"Pending","message":"","UUID":"UUID2","heartbeat":383},{"clientID":"test_supervisor932ca2ee-6c57-4885-bb71-f03aeea6054b","clientName":"undefined","clientTicket":0,"name":"test_supervisor","status":"pending","message":"","UUID":"932ca2ee-6c57-4885-bb71-f03aeea6054b","heartbeat":284},{"clientID":"SimonUUID1","clientName":"undefined","clientTicket":0,"name":"Simon","status":"Pending","message":"","UUID":"UUID1","heartbeat":384}]
+[{}]

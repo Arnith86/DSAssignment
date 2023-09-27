@@ -46,33 +46,34 @@ namespace QueueServerNameSpace{
                 }
             }
 
-            
-                
-                    dynamic jsonObj2 = JsonConvert.DeserializeObject(File.ReadAllText(@"..\..\..\supervisorSave.txt"));
-                    for (int i = 0; i < jsonObj2.Count; i++)
+            try
+            {
+                dynamic jsonObj2 = JsonConvert.DeserializeObject(File.ReadAllText(@"..\..\..\supervisorSave.txt"));
+                for (int i = 0; i < jsonObj2.Count; i++)
+                {
+                    if (jsonObj2[i].clientName != "")
                     {
-                        if (jsonObj2[i].clientName != "")
-                        {
-                            string clientName = undefined;
-                        }
-
-                        else
-                        {
-                            string clientName = undefined;
-                        }
-                        if (jsonObj2[i].clientTicket != 0 && jsonObj2[i].clientTicket != null)
-                        {
-                            int clientTicket = jsonObj2[i].clientTicket;
-                        }
-                        string name = jsonObj2[i].name;
-                        string status = jsonObj2[i].status;
-                        string UUID = jsonObj2[i].UUID;
-                        int heartbeat = jsonObj2[i].heartbeat;
-                        supervisor = new Supervisor(name, status, UUID, heartbeat);
-                        supervisorQueue[supervisor.getName() + supervisor.getUUID()] = supervisor;
-
+                        string clientName = undefined;
                     }
-            
+
+                    else
+                    {
+                        string clientName = undefined;
+                    }
+                    if (jsonObj2[i].clientTicket != 0 && jsonObj2[i].clientTicket != null)
+                    {
+                        int clientTicket = jsonObj2[i].clientTicket;
+                    }
+                    string name = jsonObj2[i].name;
+                    string status = jsonObj2[i].status;
+                    string UUID = jsonObj2[i].UUID;
+                    int heartbeat = jsonObj2[i].heartbeat;
+                    supervisor = new Supervisor(name, status, UUID, heartbeat);
+                    supervisorQueue[supervisor.getName() + supervisor.getUUID()] = supervisor;
+
+                }
+            }
+            catch { }
 
             //prints queueList (null indicates that no new client was added)
             queueListConsolePrintout(null);
@@ -600,6 +601,7 @@ namespace QueueServerNameSpace{
                     JObject supervisorsClientObject = new JObject();
 
                     studentQueueJArray.Add(supervisorObject);
+                    saveCurrentLists();
                 }
             }
             
@@ -617,7 +619,7 @@ namespace QueueServerNameSpace{
                 return "[{" + string.Join("},{", x) + "}]";
             }
             string js2 = MyDictionaryToJson(queueList);
-            Console.WriteLine(js2);
+            
 
             try
             {
@@ -637,8 +639,7 @@ namespace QueueServerNameSpace{
                 return "[{" + string.Join("},{", x) + "}]";
             }
             string js3 = My2ndDictionaryToJson(supervisorQueue);
-            Console.WriteLine(js3);
-
+           
             try
             {
                 File.WriteAllText(@"..\..\..\supervisorSave.txt", js3);
