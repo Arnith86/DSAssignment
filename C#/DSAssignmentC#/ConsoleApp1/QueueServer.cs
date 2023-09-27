@@ -74,7 +74,7 @@ namespace QueueServerNameSpace{
                     }
                 }
             }
-           student = new Student("JP", 1, "UUID3", 400);                   // THESE ARE TO BE REMOVED AFTER TESTING IS COMPLEATED 
+            student = new Student("JP", 1, "UUID3", 400);                   // THESE ARE TO BE REMOVED AFTER TESTING IS COMPLEATED 
             queueList[student.getName()+student.getUUID()] = student;
             student = new Student("Adam", 2, "UUID4", 400);
             queueList[student.getName()+student.getUUID()] = student;

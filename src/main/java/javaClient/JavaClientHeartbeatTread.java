@@ -50,6 +50,8 @@ public class JavaClientHeartbeatTread {
 	        }
 	        else {
 	        	System.out.println("error");
+				// tells the javaClient to make the gui display a informative message to the user
+				javaClient.reconnectingNotification();
 	        }
 			
 			socket.close();

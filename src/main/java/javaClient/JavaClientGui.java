@@ -27,6 +27,7 @@ public class JavaClientGui implements ActionListener{
 	private String clientString = "student";
 	private String portError = "PortError"; 
 	private String turn = "turn";
+	private String reconnectNotify = "reconnectNotify";
 	private String noAddress = "noAddress";
 	private Boolean notificationSent = false; 
 	private String supervisorStatusInputArray[] = {"pending", "available","occupied"};
@@ -360,7 +361,17 @@ public class JavaClientGui implements ActionListener{
 	}
 
 	// contains some popup notifications
-	private void notifications(String kind){
+	protected void notifications(String kind){
+		
+		if(kind.equals(reconnectNotify)){
+			JOptionPane.showMessageDialog(
+				null,             
+				"Lost the connection, attempting to reconnect!",   
+				"Lost connection!",   
+				JOptionPane.INFORMATION_MESSAGE
+			);
+			JOptionPane.getRootFrame().setAlwaysOnTop(true);	
+		}
 
 		if(kind.equals(turn)){
 			JOptionPane.showMessageDialog(

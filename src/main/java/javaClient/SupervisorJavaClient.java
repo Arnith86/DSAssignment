@@ -79,6 +79,7 @@ public class SupervisorJavaClient extends JavaClient  {
 		return null; 
 	} 
 
+	
 	// sends the registered supervisor message
 	protected void registerSupervisorMessage(String message){
 		try(ZContext context = new ZContext()){

@@ -19,6 +19,7 @@ public class JavaClient {
 
 	// variables used in the class
 	private static String undefined = "undefined";
+	private String reconnectNotify = "reconnectNotify";
 	protected UUID newUUID = null; 
 	protected String user;
 	protected String serverAddress;
@@ -254,9 +255,11 @@ public class JavaClient {
 			context.close();
 		}
 	}
-	public void testtest(){
-		System.out.println("I got the message from : ");
+
+	protected void reconnectingNotification(){
+		gui.notifications(reconnectNotify);
 	}
+	
 	private Runnable heartbeat(JavaClientHeartbeatTread heartbeat){
 		heartbeat.heartbeat();
 		return null; 
