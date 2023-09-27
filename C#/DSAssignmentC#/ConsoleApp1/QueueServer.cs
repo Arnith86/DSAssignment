@@ -45,27 +45,35 @@ namespace QueueServerNameSpace{
                     queueList[student.getName() + student.getUUID()] = student;
                 }
             }
-        
+
             
-            lock (queueList)
-            {
-                 //lock (supervisor)
-                 {
-                    try
+                
+                    dynamic jsonObj2 = JsonConvert.DeserializeObject(File.ReadAllText(@"..\..\..\supervisorSave.txt"));
+                    for (int i = 0; i < jsonObj2.Count; i++)
                     {
-                        supervisorQueue =
-                        JsonConvert.DeserializeObject<ConcurrentDictionary<string, Supervisor>>
-                                             (File.ReadAllText(@"..\..\..\supervisorSave.txt"));
+                        if (jsonObj2[i].clientName != "")
+                        {
+                            string clientName = undefined;
+                        }
+
+                        else
+                        {
+                            string clientName = undefined;
+                        }
+                        if (jsonObj2[i].clientTicket != 0 && jsonObj2[i].clientTicket != null)
+                        {
+                            int clientTicket = jsonObj2[i].clientTicket;
+                        }
+                        string name = jsonObj2[i].name;
+                        string status = jsonObj2[i].status;
+                        string UUID = jsonObj2[i].UUID;
+                        int heartbeat = jsonObj2[i].heartbeat;
+                        supervisor = new Supervisor(name, status, UUID, heartbeat);
+                        supervisorQueue[supervisor.getName() + supervisor.getUUID()] = supervisor;
+
                     }
-                    catch
-                    {
-                        supervisorQueue =
-                        JsonConvert.DeserializeObject<ConcurrentDictionary<string, Supervisor>>
-                                             (File.ReadAllText(@".\supervisorSave.txt"));
-                    }
-                }
-            }
             
+
             //prints queueList (null indicates that no new client was added)
             queueListConsolePrintout(null);
             
@@ -321,7 +329,7 @@ namespace QueueServerNameSpace{
                                         string studentUUID = firstElement.Value.getUUID();
 
                                         // finds the student with the lowest ticket.
-                                        foreach (var kvp in queueList)
+                                        foreach (var kvp in queueList.OrderBy(tic => tic.Value.getTicket()))
                                         {
                                             if(kvp.Value.getTicket() < studentTicket)
                                             {
@@ -619,6 +627,28 @@ namespace QueueServerNameSpace{
             {
             File.WriteAllText(@".\queueListSave.txt", js2);
             }
+
+
+            static string My2ndDictionaryToJson(ConcurrentDictionary<string, Supervisor> dict)
+            {
+                string test = $"\"clientID\":\"{{0}}\",{{1}}";
+                var x = dict.Select(d =>
+                    string.Format(test, d.Key, string.Join(",", "\"clientName\":" + "\"" + d.Value.getClientName() + "\"" + "," + "\"clientTicket\":" + d.Value.getClientTicket() + "," + "\"name\":" + "\"" + d.Value.getName() + "\"" + "," + "\"status\":" + "\"" + d.Value.getStatus() + "\"" + "," + "\"message\":" + "\"" + d.Value.getMessage() + "\"" + "," + "\"UUID\":" + "\"" + d.Value.getUUID() + "\"" + "," + "\"heartbeat\":" + d.Value.getHeartbeat())));
+                return "[{" + string.Join("},{", x) + "}]";
+            }
+            string js3 = My2ndDictionaryToJson(supervisorQueue);
+            Console.WriteLine(js3);
+
+            try
+            {
+                File.WriteAllText(@"..\..\..\supervisorSave.txt", js3);
+            }
+            catch
+            {
+                File.WriteAllText(@".\supervisorSave.txt", js3);
+            }
+
+
         }
     }
 }

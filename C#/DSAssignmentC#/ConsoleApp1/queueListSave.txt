@@ -1,1 +1,1 @@
-{"XX2dc57180-1cf1-42f7-a889-ae2681cee28e":{}}
+[{"clientID":"Name30ea3dc2-03db-49c6-b260-3e4a0a3fcf76","name":"Name","ticket":2,"UUID":"30ea3dc2-03db-49c6-b260-3e4a0a3fcf76","heartbeat":39816}]
