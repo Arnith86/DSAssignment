@@ -36,7 +36,19 @@ public class JavaClientHeartbeatTread {
 			ZMQ.Socket socket = context.createSocket(SocketType.REQ); 
 			socket.connect("tcp://"+serverAddress+":"+outPort );
 			socket.send(heartBeat.getBytes(ZMQ.CHARSET),0);
-			byte[] reply = socket.recv(0); 
+			ZMQ.Poller poller = context.createPoller(1);
+	        poller.register(socket, ZMQ.Poller.POLLIN);
+	        int rc = -1;
+	        while (rc == -1) {
+	            rc = poller.poll(2000);
+	        }
+	        poller.pollin(0);
+	        if (poller.pollin(0) == true) {
+	        	byte[] reply = socket.recv(0); 
+	        }
+	        else {
+	        	System.out.println("error");
+	        }
 			
 			socket.close();
 			context.close();
