@@ -1,6 +1,7 @@
 ﻿using System;
 // this class is used to keep track of student values in the queue
-namespace QueueServerNameSpace{
+namespace QueueServerNameSpace
+{
 	public class Student
 	{
 		private string name; 
@@ -18,42 +19,52 @@ namespace QueueServerNameSpace{
 			  
 		}
 
-		public void setIsDouble(Boolean isDouble){
+		public void setIsDouble(Boolean isDouble)
+		{
 			this.isDouble = isDouble;
 		}
-		public void setHeartbeat(int heartbeat){
+		public void setHeartbeat(int heartbeat)
+		{
 			this.heartbeat = heartbeat;
 		}
 
-		public void setName(string name){
+		public void setName(string name)
+		{
 			this.name = name; 
 		}
 
-		public void setTicket(int ticket){
+		public void setTicket(int ticket)
+		{
 			this.ticket = ticket;
 		}
 
-		public void setUUID(string UUID){
+		public void setUUID(string UUID)
+		{
 			this.UUID = UUID; 
 		}
 
-		public string getName() {
+		public string getName() 
+		{
 			return this.name;
 		}
 		
-		public int getTicket() {
+		public int getTicket() 
+		{
 			return this.ticket;
 		}
 
-		public string getUUID(){
+		public string getUUID()
+		{
 			return this.UUID;
 		}
 
-		public int getHeartbeat(){
+		public int getHeartbeat()
+		{
 			return this.heartbeat; 
 		}
 
-		public Boolean getIsDouble(){
+		public Boolean getIsDouble()
+		{
 			return this.isDouble;
 		}
 	

@@ -312,7 +312,6 @@ public class JavaClientGui implements ActionListener{
 		// regesters the values of the server address and selected ports
 		if ((e.getSource().equals(connectButton)) || (e.getSource().equals(addressInput))) {
 			
-		
 			this.serverAddress = addressInput.getText();
 						
 			try {

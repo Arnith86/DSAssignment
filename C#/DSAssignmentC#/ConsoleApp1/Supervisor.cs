@@ -4,8 +4,8 @@ using System.Net;
 // this class is used to keep track of supervisor values in the queue 
 namespace QueueServerNameSpace
 {
-    public class Supervisor{
-
+    public class Supervisor
+    {
         static string undefined = "undefined";
         private string UUID; 
         private string name; 
@@ -16,7 +16,8 @@ namespace QueueServerNameSpace
         private int heartbeat; 
         private Boolean isDouble; 
  
-        public Supervisor(string name, string status, string UUID, int heartbeat){
+        public Supervisor(string name, string status, string UUID, int heartbeat)
+        {
             this.name = name;
             this.status = status;
             this.UUID = UUID; 
@@ -24,62 +25,74 @@ namespace QueueServerNameSpace
             clientName = undefined;    
         }
 
-        public void setIsDouble(Boolean isDouble){
+        public void setIsDouble(Boolean isDouble)
+        {
 			this.isDouble = isDouble;
 		}
          
-        public void setSupervising(string clientName, int clientTicket){
+        public void setSupervising(string clientName, int clientTicket)
+        {
             this.clientName = clientName;
             this.clientTicket = clientTicket;
         } 
 
-        public void setStatus(string status){
+        public void setStatus(string status)
+        {
             this.status = status;  
         }
-        public void setSupervisorMessage(string message){
+        public void setSupervisorMessage(string message)
+        {
             this.message = message;
         }
 
-        public void setUUID(string UUID){
+        public void setUUID(string UUID)
+        {
             this.UUID = UUID;
         }
 
-        public void setHeartbeat(int heartbeat){
+        public void setHeartbeat(int heartbeat)
+        {
             this.heartbeat = heartbeat;
         }
 
-        public string getClientName(){
+        public string getClientName()
+        {
             return clientName;
         }
 
-        public int getClientTicket(){
+        public int getClientTicket()
+        {
             return clientTicket; 
         }
 
-        public string getName(){
+        public string getName()
+        {
             return name; 
         }
 
-        public string getStatus(){
+        public string getStatus()
+        {
             return status; 
         }
 
-        public string getMessage(){
+        public string getMessage()
+        {
             return message; 
         }
 
-        public string getUUID(){
+        public string getUUID()
+        {
             return this.UUID;
         }
 
-        public int getHeartbeat(){
+        public int getHeartbeat()
+        {
             return this.heartbeat;
         }
 
-        public Boolean getIsDouble(){
+        public Boolean getIsDouble()
+        {
             return this.isDouble;
         }
-        
-
     }
 }

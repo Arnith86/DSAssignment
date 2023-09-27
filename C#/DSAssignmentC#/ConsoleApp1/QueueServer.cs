@@ -339,7 +339,7 @@ namespace QueueServerNameSpace{
                                             if(kvp.Value.getName().Equals(studentName))
                                             {
                                             queueList.TryRemove(kvp.Key, out Student removedValue);
-                                            queueListRemovedConsolePrintout(kvp.Value.getName(), kvp.Value.getUUID());
+                                            removedConsolePrintout(kvp.Value.getName(), kvp.Value.getUUID());
                                             }
                                         }
 
@@ -397,7 +397,7 @@ namespace QueueServerNameSpace{
             Console.WriteLine("-----------------------------------");
         }
 
-        private static void queueListRemovedConsolePrintout(string name, string UUID)
+        private static void removedConsolePrintout(string name, string UUID)
         {  
             Console.WriteLine("-----------------------------------");
             Console.WriteLine("Supervisor "+ name +" with UUID: "+UUID+" was removed");
@@ -454,7 +454,7 @@ namespace QueueServerNameSpace{
                         }
                         
                         // console print out
-                        queueListRemovedConsolePrintout(name, UUID);
+                        removedConsolePrintout(name, UUID);
                         // save current queue
                         QueueServer.saveCurrentLists();
                     }
@@ -482,7 +482,7 @@ namespace QueueServerNameSpace{
                         }
                         
                         // console print out
-                        queueListRemovedConsolePrintout(name, UUID);
+                        removedConsolePrintout(name, UUID);
                         // save current queue
                         QueueServer.saveCurrentLists();
                     }
