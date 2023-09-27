@@ -12,6 +12,7 @@ using Microsoft.VisualBasic;
 using System;
 using System.Reflection;
 using System.Collections.Specialized;
+using System.Web;
 
 namespace QueueServerNameSpace{
     static partial class QueueServer{
@@ -23,48 +24,42 @@ namespace QueueServerNameSpace{
         // used to keep track of clients connected to the server
         static ConcurrentDictionary <string, Student> queueList = new ConcurrentDictionary<string, Student>();
         static ConcurrentDictionary <string, Supervisor> supervisorQueue = new ConcurrentDictionary<string, Supervisor>();
+        private static int biggestTicket;
 
         public static void sendList()
         {
-           lock (queueList)
+            try
+            {
+                dynamic jsonObj = JsonConvert.DeserializeObject(File.ReadAllText(@"..\..\..\queueListSave.txt"));
+                for (int i = 0; i < jsonObj.Count; i++)
+                {
+                    string name = jsonObj[i].name;
+                    int tickets = jsonObj[i].ticket;
+                    string UUID = jsonObj[i].UUID;
+                    int heartbeat = jsonObj[i].heartbeat;
+                    student = new Student(name, tickets, UUID, heartbeat);                   // THESE ARE TO BE REMOVED AFTER TESTING IS COMPLEATED 
+                    queueList[student.getName() + student.getUUID()] = student;
+                }
+            }
+            catch
+            {
+                dynamic jsonObj = JsonConvert.DeserializeObject(File.ReadAllText(@".\queueListSave.txt"));
+                for (int i = 0; i < jsonObj.Count; i++)
+                {
+                    string name = jsonObj[i].name;
+                    int tickets = jsonObj[i].ticket;
+                    string UUID = jsonObj[i].UUID;
+                    int heartbeat = jsonObj[i].heartbeat;
+                    student = new Student(name, tickets, UUID, heartbeat);                   // THESE ARE TO BE REMOVED AFTER TESTING IS COMPLEATED 
+                    queueList[student.getName() + student.getUUID()] = student;
+                }
+            }
+        
+            
+            lock (queueList)
             {
                  lock (supervisor)
                  {
-                    // used to save the current state of the server. 
-                    try
-                    {
-                        queueList =
-                        JsonConvert.DeserializeObject<ConcurrentDictionary<string, Student>>
-                                             (File.ReadAllText(@"..\..\..\queueListSave.txt"));
-                        Console.WriteLine("try");
-                    }
-                    catch {
-                        queueList =
-                        JsonConvert.DeserializeObject<ConcurrentDictionary<string, Student>>
-                                             (File.ReadAllText(@".\queueListSave.txt"));
-                        Console.WriteLine("catch");
-                    }
-                    if (queueList is null)
-                    {
-                        Console.WriteLine("queue was null");
-
-                        try
-                        {
-                            File.WriteAllText(@"..\..\..\queueListSave.txt", "{ \"AdamUUID4\":{ }," + "}");
-                        }
-                        catch
-                        {
-                            File.WriteAllText(@".\queueListSave.txt", "{ \"AdamUUID4\":{ }," + "}");
-                        }
-                    }
-                    else
-                    {
-                        foreach (KeyValuePair<string, Student> pair in queueList.OrderBy(tic => tic.Value.getTicket()))
-                        {
-                            queueList[pair.Key].setHeartbeat(4);
-                        }
-                    }
-
                     try
                     {
                         supervisorQueue =
@@ -79,25 +74,18 @@ namespace QueueServerNameSpace{
                     }
                 }
             }
-            student = new Student("JP", 1, "UUID3", 400);                   // THESE ARE TO BE REMOVED AFTER TESTING IS COMPLEATED 
+           student = new Student("JP", 1, "UUID3", 400);                   // THESE ARE TO BE REMOVED AFTER TESTING IS COMPLEATED 
             queueList[student.getName()+student.getUUID()] = student;
             student = new Student("Adam", 2, "UUID4", 400);
             queueList[student.getName()+student.getUUID()] = student;
-            string json = JsonConvert.SerializeObject(queueList);
-            try
-            {
-                File.WriteAllText(@"..\..\..\queueListSave.txt", json);
-            }
-            catch
-            {
-                File.WriteAllText(@".\queueListSave.txt", json);
-            }
-
+            string json = JsonConvert.SerializeObject(queueList);*/
+            //student = new Student("null-man", 1, "UUIDNull", 400000);                   // THESE ARE TO BE REMOVED AFTER TESTING IS COMPLEATED 
+            //queueList[student.getName() + student.getUUID()] = student;
 
 
             //Console.Clear();       <----------------------------------------/// THIS ROW COUSES ERRORS 
-            
-                Console.WriteLine("-----------------------------------");
+
+            Console.WriteLine("-----------------------------------");
                 Console.WriteLine("");
                 Console.WriteLine("-----------------------------------");
                 // USED FOR TESTING  THESE ARE TO BE REMOVED AFTER TESTING IS COMPLEATED 
@@ -112,8 +100,8 @@ namespace QueueServerNameSpace{
                 Console.WriteLine("-----------------------------------");
                 Console.WriteLine("-----------------------------------");
             
-                // activates the threads that listens to requests 
-                Thread addToListThread = new Thread(new ThreadStart(checkRequests));
+            // activates the threads that listens to requests 
+            Thread addToListThread = new Thread(new ThreadStart(checkRequests));
                 addToListThread.Start();
                 // activates the thread that counts down the current heartbeat values 
                 Thread countdownThread = new Thread(countdown);
@@ -142,7 +130,7 @@ namespace QueueServerNameSpace{
 
                             if (kvp.Value.getClientName() != undefined)
                             {
-                                supervisorName = kvp.Key; 
+                                supervisorName = kvp.Value.getName(); 
                                 clientName = kvp.Value.getClientName();
                                 supervisorMessage = kvp.Value.getMessage();
                                 pub.SendMoreFrame(clientName).SendFrame(sendSupervisorMessage(supervisorMessage, supervisorName));
@@ -177,61 +165,67 @@ namespace QueueServerNameSpace{
                         if (!queueList.ContainsKey(name+UUID) && jsonObj != null && jsonObj.ContainsKey("enterQueue"))
                         {
                             lock (queueList)            //                <-------------- WOULD NOT GET PAST THIS LOCK 
-                             {
-
-                            Boolean nameIsInList = false;     
-                            int newMaxKey;
-
-                            // checks to see if the suplied name already is in the queue
-                            foreach (var kvp in queueList.OrderBy(tic => tic.Value.getTicket()))
                             {
-                                if(kvp.Value.getName().Equals(name)){
-                                    nameIsInList = true; 
+
+                                Boolean nameIsInList = false;
+                                int newMaxKey;
+
+
+                                // checks to see if the suplied name already is in the queue
+                                foreach (var kvp in queueList)
+                                {
+                                    if (kvp.Value.getName().Equals(name))
+                                    {
+                                        nameIsInList = true;
+                                    }
+
+
                                 }
-                            }
-                            
-                            // gets the highest index in the queue
-                            if(queueList.Count() > 0 )
-                            {
-                                var maxKey = queueList.Count;
-                                newMaxKey = maxKey + 1;   
-                            } else { newMaxKey = 1; }
 
-                            Student student = new Student(name, newMaxKey, UUID, 4);
 
-                            // specifys if the new entrie already has its supplied name in the queue
-                            if(nameIsInList == false)
-                                    { student.setIsDouble(false); }
-                            else { student.setIsDouble(true); }
-                             
-                            queueList[name+UUID] = student;
-                            // HERE FOR TESTING REASONS, remove when done 
-                            foreach (var kvp in queueList.OrderBy(tic => tic.Value.getTicket()))
-                            {
-                                Console.WriteLine("key= "+kvp.Key+" ticket = "+kvp.Value.getTicket()+ " name = "+kvp.Value.getName()+ " UUID: "+kvp.Value.getUUID() );
+                                // gets the highest index in the queue
+                                if (queueList.Count() > 0)
+                                {
 
-                            }
+                                    foreach (var kvp in queueList.OrderBy(tic => tic.Value.getTicket()))
+                                    {
+                                        biggestTicket = kvp.Value.getTicket();
 
-                            server.SendFrame("{\"ticket\": " + newMaxKey + ", \"name\": \"" + name + "\"}");
-                            //  Console.Clear();                      <---------------- couses an error              
-                            Console.WriteLine("-----------------------------------");
-                            Console.WriteLine(name + " was added to the queue");
-                            Console.WriteLine("-----------------------------------");
-                            foreach (var kvp in queueList)
-                            {
-                                Console.WriteLine("ticket = "+kvp.Value.getTicket()+" name = "+kvp.Value.getName());
+                                        biggestTicket++;
+                                    }
+
+                                    newMaxKey = biggestTicket;
+                                }
+                                else { newMaxKey = 1; }
+
+
+                                Student student = new Student(name, newMaxKey, UUID, 4);
+
+                                // specifys if the new entrie already has its supplied name in the queue
+                                if (nameIsInList == false)
+                                { student.setIsDouble(false); }
+                                else { student.setIsDouble(true); }
+
+                                queueList[name + UUID] = student;
+                                // HERE FOR TESTING REASONS, remove when done 
+                                foreach (var kvp in queueList.OrderBy(tic => tic.Value.getTicket()))
+                                {
+                                    Console.WriteLine("key= " + kvp.Key + " ticket = " + kvp.Value.getTicket() + " name = " + kvp.Value.getName() + " UUID: " + kvp.Value.getUUID());
+
+                                }
+
+                                server.SendFrame("{\"ticket\": " + newMaxKey + ", \"name\": \"" + name + "\"}");
+                                //  Console.Clear();                      <---------------- couses an error              
+                                Console.WriteLine("-----------------------------------");
+                                Console.WriteLine(name + " was added to the queue");
+                                Console.WriteLine("-----------------------------------");
+                                foreach (var kvp in queueList.OrderBy(tic => tic.Value.getTicket()))
+                                {
+                                    Console.WriteLine("ticket = " + kvp.Value.getTicket() + " name = " + kvp.Value.getName());
+                                }
+                                Console.WriteLine("-----------------------------------");
+                                saveCurrentLists();
                             }
-                            Console.WriteLine("-----------------------------------");
-                            string json = JsonConvert.SerializeObject(queueList);
-                            try
-                            {
-                                File.WriteAllText(@".\queueListSave.txt", json);
-                            }
-                            catch
-                            {
-                                File.WriteAllText(@"..\..\..\queueListSave.txt", json);
-                            }
-                             }
                             // }
 
                         }
@@ -364,8 +358,9 @@ namespace QueueServerNameSpace{
                                     
                                     queueList.TryRemove(studentName+studentUUID, out Student removedValue);
 
-                                   QueueServer.saveCurrentLists();
-                                }               
+                                        //QueueServer.saveCurrentLists();
+                                        
+                                    }               
                                 }
                             }
 
@@ -396,50 +391,80 @@ namespace QueueServerNameSpace{
                 }
             }
             return UUID; 
-        } 
+        }
 
         // handles the countdown of the current heartbeat values
         public static void countdown()
         {
-            ConcurrentDictionary <string, Student> queueListCopy;
-            
-            
-                queueListCopy = queueList;
-            
-            string removedStudent;
+            ConcurrentDictionary<string, Student> queueListCopy;
+            ConcurrentDictionary<string, Supervisor> supervisorQueueCopy;
+
+            queueListCopy = queueList;
+            supervisorQueueCopy = supervisorQueue;
+
+            string removedValue;
             while (true)
             {
                 foreach (KeyValuePair<string, Student> pair in queueListCopy.OrderBy(tic => tic.Value.getTicket()))
                 {
                     if (pair.Value.getHeartbeat() <= 0)
                     {
-                        removedStudent = pair.Key;
+                        removedValue = pair.Key;
                         lock (queueList)
                         {
                             queueList.TryRemove(pair.Key, out Student returnValue);
                         }
-                    //    Console.Clear();                               // < ------------------------COUSES AN ERROR 
+                        //    Console.Clear();                               // < ------------------------COUSES AN ERROR 
                         Console.WriteLine("-----------------------------------");
-                        Console.WriteLine(removedStudent + " was removed from the queue");
+                        Console.WriteLine(removedValue + " was removed from the queue");
                         Console.WriteLine("-----------------------------------");
                         foreach (var kvp in queueList.OrderBy(tic => tic.Value.getTicket()))
                         {
                             Console.WriteLine("ticket = {0}, name = {1}", kvp.Key, kvp.Value);
                         }
                         Console.WriteLine("-----------------------------------");
-                            QueueServer.saveCurrentLists();
-                        }
+                        QueueServer.saveCurrentLists();
+                    }
                     else
                     {
-                        removedStudent = pair.Key;
+                        removedValue = pair.Key;
                         int currentHeartbeat = queueList[pair.Key].getHeartbeat() - 1;
                         queueList[pair.Key].setHeartbeat(currentHeartbeat);
 
                     }
                 }
-                Thread.Sleep(1000);
+
+                foreach (KeyValuePair<string, Supervisor> pair in supervisorQueueCopy)
+                {
+                    if (pair.Value.getHeartbeat() <= 0)
+                    {
+                        removedValue = pair.Key;
+                        lock (supervisorQueue)
+                        {
+                            supervisorQueue.TryRemove(pair.Key, out Supervisor returnValue);
+                        }
+                        //    Console.Clear();                               // < ------------------------COUSES AN ERROR 
+                        Console.WriteLine("-----------------------------------");
+                        Console.WriteLine(removedValue + " was removed from the queue");
+                        Console.WriteLine("-----------------------------------");
+                        foreach (var kvp in queueList.OrderBy(tic => tic.Value.getTicket()))
+                        {
+                            Console.WriteLine("ticket = {0}, name = {1}", kvp.Key, kvp.Value);
+                        }
+                        Console.WriteLine("-----------------------------------");
+                        QueueServer.saveCurrentLists();
+                    }
+                    else
+                    {
+                        removedValue = pair.Key;
+                        int currentHeartbeat = supervisorQueue[pair.Key].getHeartbeat() - 1;
+                        supervisorQueue[pair.Key].setHeartbeat(currentHeartbeat);
+
+                    }
                 }
-            
+                Thread.Sleep(1000);
+            }
+
         }
 
         // marshalls the supervisor message 
@@ -508,7 +533,8 @@ namespace QueueServerNameSpace{
                 supervisorObject.Add(client);
                 sypervisorQueueJArray.Add(supervisorObject);
 
-              QueueServer.saveCurrentLists();
+              //QueueServer.saveCurrentLists();
+
             }
 
             return sypervisorQueueJArray.ToString();
@@ -539,7 +565,7 @@ namespace QueueServerNameSpace{
 
                     studentQueueJArray.Add(supervisorObject);
                 }
-                QueueServer.saveCurrentLists();
+                //QueueServer.saveCurrentLists();
             }
             
             return studentQueueJArray.ToString();
@@ -565,20 +591,24 @@ namespace QueueServerNameSpace{
 
         public static void saveCurrentLists()
         {
-           
-            
-            string jsons = JsonConvert.SerializeObject(supervisor);
-            
-            File.WriteAllText(@".\supervisorSave.txt", jsons);
-            File.WriteAllText(@"..\..\..\supervisorSave.txt", jsons);
-            
-            
-            string json = JsonConvert.SerializeObject(queueList);
-            
-            File.WriteAllText(@".\queueListSave.txt", json);
-            File.WriteAllText(@"..\..\..\queueListSave.txt", json);
-            
-            
+            static string MyDictionaryToJson(ConcurrentDictionary<string, Student> dict)
+            {
+                string test = $"\"clientID\":\"{{0}}\",{{1}}";
+                var x = dict.Select(d =>
+                    string.Format(test, d.Key, string.Join(",", "\"name\":" + "\"" + d.Value.getName() + "\"" + "," + "\"ticket\":" + d.Value.getTicket() + "," + "\"UUID\":" + "\"" + d.Value.getUUID() + "\"" + "," + "\"heartbeat\":" + d.Value.getHeartbeat())));
+                return "[{" + string.Join("},{", x) + "}]";
+            }
+            string js2 = MyDictionaryToJson(queueList);
+            Console.WriteLine(js2);
+
+            try
+            {
+                File.WriteAllText(@"..\..\..\queueListSave.txt", js2);
+            }
+            catch
+            {
+            File.WriteAllText(@".\queueListSave.txt", js2);
+            }
         }
     }
 }
